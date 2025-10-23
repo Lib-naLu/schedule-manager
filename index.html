@@ -33,11 +33,19 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
             font-size: 2em;
             margin-bottom: 10px;
+            cursor: pointer;
+            display: inline-block;
+            transition: opacity 0.2s;
+        }
+
+        .header h1:hover {
+            opacity: 0.8;
         }
 
         .header p {
@@ -124,7 +132,7 @@
         .task-list-column {
             min-width: 300px;
             max-width: 300px;
-            background: #f8f9fa;
+            background: #fafafa;
             border-right: 3px solid #006888;
             overflow-y: auto;
         }
@@ -134,6 +142,7 @@
             flex: 1;
             overflow-x: auto;
             overflow-y: auto;
+            background: #fff;
         }
 
         .month-header {
@@ -143,42 +152,43 @@
             top: 0;
             z-index: 50;
             background: white;
+            border-bottom: 2px solid #006888;
         }
 
         .month-item {
             text-align: center;
-            padding: 8px 5px;
-            font-size: 0.9em;
-            color: #006888;
+            padding: 10px 5px;
+            font-size: 0.95em;
+            color: white;
             font-weight: bold;
-            background: #e3f2fd;
-            border: 1px solid #006888;
-            border-right: none;
+            background: #006888;
+            border-right: 1px solid #004d66;
         }
 
         .month-item:last-child {
-            border-right: 1px solid #006888;
+            border-right: none;
         }
 
         .timeline {
             display: flex;
             min-width: fit-content;
             position: sticky;
-            top: 44px;
+            top: 46px;
             z-index: 50;
             background: white;
             border-bottom: 2px solid #006888;
         }
 
         .timeline-item {
-            min-width: 30px;
+            min-width: 40px;
             text-align: center;
-            padding: 5px 2px;
-            font-size: 0.75em;
-            color: #006888;
-            font-weight: bold;
+            padding: 8px 2px;
+            font-size: 0.8em;
+            color: #333;
+            font-weight: 600;
             border-right: 1px solid #dee2e6;
             position: relative;
+            background: #f8f9fa;
         }
 
         .timeline-item::after {
@@ -187,35 +197,48 @@
             right: 0;
             top: 100%;
             width: 1px;
-            height: 2000px;
-            background: #e9ecef;
+            height: 3000px;
+            background: #e0e0e0;
             z-index: 1;
         }
 
         .timeline-item.weekend {
-            background: #f0f8ff;
+            background: #e3f2fd;
+            color: #1976d2;
         }
 
         /* タスク行 */
         .task-row {
             min-height: 60px;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid #e0e0e0;
             background: white;
         }
 
+        .task-row:nth-child(even) {
+            background: #fafafa;
+        }
+
         .task-row:hover {
-            background: #f8f9fa;
+            background: #f0f0f0;
         }
 
         .task-row.parent {
-            background: #e7e9fc;
+            background: #e7f3ff;
+        }
+
+        .task-row.parent:nth-child(even) {
+            background: #d6ebff;
         }
 
         .task-row.parent:hover {
-            background: #d4d7f5;
+            background: #c5e1ff;
         }
 
         .task-row.child {
+            background: white;
+        }
+
+        .task-row.child:nth-child(even) {
             background: #fafafa;
         }
 
@@ -269,20 +292,35 @@
         /* ガントチャート部分 */
         .gantt-chart-area {
             min-width: fit-content;
-            padding: 10px 0;
+            padding: 0;
+            position: relative;
         }
 
         .gantt-chart-row {
             position: relative;
-            height: 40px;
-            min-height: 40px;
+            height: 60px;
+            min-height: 60px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .gantt-chart-row:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .gantt-chart-row.parent {
+            background: #e7f3ff;
+        }
+
+        .gantt-chart-row.parent:nth-child(even) {
+            background: #d6ebff;
         }
 
         .gantt-bar {
             position: absolute;
-            height: 30px;
-            top: 5px;
-            border-radius: 5px;
+            height: 32px;
+            top: 14px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -290,12 +328,29 @@
             font-size: 0.85em;
             font-weight: bold;
             cursor: pointer;
-            transition: opacity 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.1);
         }
 
         .gantt-bar:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+        }
+
+        /* 親タスクの実施日表示 */
+        .event-date-badge {
+            position: absolute;
+            top: -8px;
+            right: 5px;
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            white-space: nowrap;
         }
 
         .modal {
@@ -317,11 +372,13 @@
 
         .modal-content {
             background-color: white;
-            margin: 5% auto;
+            margin: 3% auto;
             padding: 30px;
             border-radius: 15px;
             width: 90%;
             max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             animation: slideDown 0.3s;
         }
@@ -382,6 +439,46 @@
             cursor: pointer;
         }
 
+        .color-picker-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .color-presets {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .color-preset {
+            width: 100%;
+            height: 50px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .color-preset:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .color-preset.selected {
+            border-color: #006888;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #006888;
+        }
+
+        .color-preset-label {
+            font-size: 0.75em;
+            text-align: center;
+            margin-top: 5px;
+            color: #666;
+        }
+
         .info-icon {
             display: inline-block;
             width: 20px;
@@ -411,7 +508,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Event Timeline Manager</h1>
+            <h1 id="toolTitle" onclick="editToolTitle()">Event Timeline Manager</h1>
             <p>2025年10月 〜 2025年12月</p>
         </div>
 
@@ -420,7 +517,7 @@
         </div>
 
         <div class="legend">
-            <div class="legend-title">凡例</div>
+            <div class="legend-title">イベント-企画</div>
             <div class="legend-items" id="legendItems">
                 <span style="color: #999;">タスクが登録されていません</span>
             </div>
@@ -457,7 +554,7 @@
 
                 <div class="form-group">
                     <label>種別 <span class="info-icon" title="親タスク:イベント全体、子タスク:個別のタスク">?</span></label>
-                    <select id="taskType" required>
+                    <select id="taskType" required onchange="updateFormFields()">
                         <option value="parent">親タスク(イベント全体)</option>
                         <option value="child">子タスク(個別タスク)</option>
                     </select>
@@ -483,9 +580,17 @@
                     <input type="date" id="taskEndDate" required>
                 </div>
 
+                <div class="form-group" id="eventDateGroup" style="display:none;">
+                    <label>実施日 <span class="info-icon" title="イベントの実施日を入力（親タスクのみ）">?</span></label>
+                    <input type="date" id="eventDate">
+                </div>
+
                 <div class="form-group">
                     <label>ガントチャートの色</label>
-                    <input type="color" id="taskColor" value="#667eea">
+                    <div class="color-picker-group">
+                        <div class="color-presets" id="colorPresets"></div>
+                        <input type="color" id="taskColor" value="#667eea">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -499,8 +604,23 @@
     </div>
 
     <script>
-        // データ構造（サンプルデータなし）
+        // カラープリセット（明暗10色）
+        const colorPresets = [
+            { name: '赤-明', color: '#ef5350' },
+            { name: '赤-暗', color: '#c62828' },
+            { name: '青-明', color: '#42a5f5' },
+            { name: '青-暗', color: '#1565c0' },
+            { name: '緑-明', color: '#66bb6a' },
+            { name: '緑-暗', color: '#2e7d32' },
+            { name: '黄-明', color: '#ffee58' },
+            { name: '黄-暗', color: '#f9a825' },
+            { name: '紫-明', color: '#ab47bc' },
+            { name: '紫-暗', color: '#6a1b9a' }
+        ];
+
+        // データ構造
         let tasks = [];
+        let toolTitle = 'Event Timeline Manager';
 
         const startDate = new Date('2025-10-01');
         const endDate = new Date('2025-12-31');
@@ -508,9 +628,72 @@
 
         // 初期化
         function init() {
+            loadToolTitle();
+            renderColorPresets();
             renderMonthHeader();
             renderTimeline();
             renderAll();
+        }
+
+        // ツール名称の読み込み
+        function loadToolTitle() {
+            const savedTitle = localStorage.getItem('toolTitle');
+            if (savedTitle) {
+                toolTitle = savedTitle;
+                document.getElementById('toolTitle').textContent = toolTitle;
+            }
+        }
+
+        // ツール名称の編集
+        function editToolTitle() {
+            const newTitle = prompt('ツール名称を入力してください:', toolTitle);
+            if (newTitle && newTitle.trim() !== '') {
+                toolTitle = newTitle.trim();
+                document.getElementById('toolTitle').textContent = toolTitle;
+                localStorage.setItem('toolTitle', toolTitle);
+            }
+        }
+
+        // カラープリセット描画
+        function renderColorPresets() {
+            const container = document.getElementById('colorPresets');
+            container.innerHTML = '';
+            
+            colorPresets.forEach(preset => {
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'color-preset';
+                colorDiv.style.backgroundColor = preset.color;
+                colorDiv.title = preset.name;
+                colorDiv.onclick = () => selectColorPreset(preset.color, colorDiv);
+                
+                container.appendChild(colorDiv);
+            });
+        }
+
+        // カラープリセット選択
+        function selectColorPreset(color, element) {
+            document.getElementById('taskColor').value = color;
+            
+            // 選択状態の更新
+            document.querySelectorAll('.color-preset').forEach(el => {
+                el.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        // フォームフィールド更新
+        function updateFormFields() {
+            const taskType = document.getElementById('taskType').value;
+            const parentSelectGroup = document.getElementById('parentSelectGroup');
+            const eventDateGroup = document.getElementById('eventDateGroup');
+            
+            if (taskType === 'child') {
+                parentSelectGroup.style.display = 'block';
+                eventDateGroup.style.display = 'none';
+            } else {
+                parentSelectGroup.style.display = 'none';
+                eventDateGroup.style.display = 'block';
+            }
         }
 
         // 月ヘッダー描画
@@ -528,8 +711,8 @@
                 const item = document.createElement('div');
                 item.className = 'month-item';
                 item.textContent = month.name;
-                item.style.minWidth = (month.days * 30) + 'px';
-                item.style.flex = `0 0 ${month.days * 30}px`;
+                item.style.minWidth = (month.days * 40) + 'px';
+                item.style.flex = `0 0 ${month.days * 40}px`;
                 monthHeader.appendChild(item);
             });
         }
@@ -639,7 +822,11 @@
 
                 const taskDetails = document.createElement('div');
                 taskDetails.className = 'task-details';
-                taskDetails.textContent = `担当: ${task.assignee} | ${task.startDate} 〜 ${task.endDate}`;
+                let detailText = `担当: ${task.assignee} | ${task.startDate} 〜 ${task.endDate}`;
+                if (task.eventDate) {
+                    detailText += ` | 実施日: ${task.eventDate}`;
+                }
+                taskDetails.textContent = detailText;
 
                 taskInfo.appendChild(taskInfoHeader);
                 taskInfo.appendChild(taskDetails);
@@ -662,8 +849,8 @@
                 }
 
                 const chartRow = document.createElement('div');
-                chartRow.className = 'gantt-chart-row';
-                chartRow.style.minWidth = (totalDays * 30) + 'px';
+                chartRow.className = `gantt-chart-row ${task.type}`;
+                chartRow.style.minWidth = (totalDays * 40) + 'px';
 
                 const taskStart = new Date(task.startDate);
                 const taskEnd = new Date(task.endDate);
@@ -672,10 +859,18 @@
 
                 const bar = document.createElement('div');
                 bar.className = 'gantt-bar';
-                bar.style.left = `${startOffset * 30}px`;
-                bar.style.width = `${duration * 30}px`;
+                bar.style.left = `${startOffset * 40}px`;
+                bar.style.width = `${duration * 40}px`;
                 bar.style.backgroundColor = task.color;
                 bar.onclick = () => editTask(task.id);
+
+                // 親タスクで実施日がある場合、バッジ表示
+                if (task.type === 'parent' && task.eventDate) {
+                    const badge = document.createElement('div');
+                    badge.className = 'event-date-badge';
+                    badge.textContent = `実施: ${task.eventDate}`;
+                    bar.appendChild(badge);
+                }
 
                 chartRow.appendChild(bar);
                 ganttChartArea.appendChild(chartRow);
@@ -743,6 +938,9 @@
                 
                 const label = document.createElement('span');
                 label.textContent = task.name;
+                if (task.eventDate) {
+                    label.textContent += ` (実施: ${task.eventDate})`;
+                }
                 
                 item.appendChild(color);
                 item.appendChild(label);
@@ -755,14 +953,17 @@
             document.getElementById('taskForm').reset();
             document.getElementById('taskModal').style.display = 'block';
             updateParentSelect();
+            updateFormFields();
             
             // デフォルト日付を設定
-            const today = new Date();
-            const defaultStart = new Date(2025, 9, 1); // 2025年10月1日
-            const defaultEnd = new Date(2025, 9, 7);   // 2025年10月7日
+            const defaultStart = new Date(2025, 9, 1);
+            const defaultEnd = new Date(2025, 9, 7);
             
             document.getElementById('taskStartDate').value = defaultStart.toISOString().split('T')[0];
             document.getElementById('taskEndDate').value = defaultEnd.toISOString().split('T')[0];
+            
+            // デフォルトカラー設定
+            document.getElementById('taskColor').value = '#667eea';
         }
 
         function editTask(taskId) {
@@ -776,24 +977,23 @@
             document.getElementById('taskEndDate').value = task.endDate;
             document.getElementById('taskColor').value = task.color;
             document.getElementById('taskLink').value = task.link || '';
+            document.getElementById('eventDate').value = task.eventDate || '';
+
+            // カラープリセットの選択状態を更新
+            const presetIndex = colorPresets.findIndex(p => p.color === task.color);
+            if (presetIndex !== -1) {
+                const presetElements = document.querySelectorAll('.color-preset');
+                presetElements[presetIndex].classList.add('selected');
+            }
 
             document.getElementById('taskModal').style.display = 'block';
             updateParentSelect();
+            updateFormFields();
         }
 
         function closeModal() {
             document.getElementById('taskModal').style.display = 'none';
         }
-
-        // タイプ選択時の処理
-        document.getElementById('taskType').addEventListener('change', function() {
-            const parentSelectGroup = document.getElementById('parentSelectGroup');
-            if (this.value === 'child') {
-                parentSelectGroup.style.display = 'block';
-            } else {
-                parentSelectGroup.style.display = 'none';
-            }
-        });
 
         // 親タスク選択肢更新
         function updateParentSelect() {
@@ -849,6 +1049,10 @@
             
             if (newTask.type === 'parent') {
                 newTask.collapsed = false;
+                const eventDate = document.getElementById('eventDate').value;
+                if (eventDate) {
+                    newTask.eventDate = eventDate;
+                }
             }
 
             tasks.push(newTask);
