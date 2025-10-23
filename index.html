@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学校行事スケジュール管理ツール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .gantt-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .gantt-header {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .gantt-header-item {
+            font-weight: bold;
+            color: #667eea;
+            padding: 10px;
+        }
+
+        .gantt-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .gantt-row:hover {
+            background: #e9ecef;
+        }
+
+        .gantt-row.parent {
+            background: #e7e9fc;
+            font-weight: bold;
+        }
+
+        .gantt-row.child {
+            margin-left: 30px;
+            background: #f8f9fa;
+        }
+
+        .task-info {
+            min-width: 350px;
+            padding-right: 20px;
+        }
+
+        .task-name {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .task-details {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .gantt-chart {
+            flex: 1;
+            position: relative;
+            height: 40px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .gantt-bar {
+            position: absolute;
+            height: 30px;
+            top: 5px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .gantt-bar:hover {
+            opacity: 0.9;
+        }
+
+        .timeline {
+            display: flex;
+            margin-bottom: 10px;
+            padding: 0 30px;
+            padding-left: 380px;
+        }
+
+        .timeline-item {
+            flex: 1;
+            text-align: center;
+            padding: 5px;
+            font-size: 0.9em;
+            color: #667eea;
+            font-weight: bold;
+            border-right: 1px solid #dee2e6;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close:hover {
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group input[type="color"] {
+            height: 50px;
+            cursor: pointer;
+        }
+
+        .legend {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 0.8em;
+            cursor: help;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 学校行事スケジュール管理ツール</h1>
+            <p>2025年10月 〜 2025年12月</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="addTask()">➕ 新規タスク追加</button>
+            <button class="btn" onclick="exportData()">💾 データ保存</button>
+            <button class="btn" onclick="importData()">📂 データ読込</button>
+        </div>
+
+        <div class="timeline" id="timeline"></div>
+
+        <div class="gantt-container" id="ganttContainer"></div>
+
+        <div class="legend">
+            <div class="legend-title">凡例</div>
+            <div class="legend-items" id="legendItems"></div>
+        </div>
+    </div>
+
+    <!-- モーダル -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>タスク情報</h2>
+            <form id="taskForm">
+                <div class="form-group">
+                    <label>イベント名 <span class="info-icon" title="親タスクまたは子タスクの名前を入力">?</span></label>
+                    <input type="text" id="taskName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>種別 <span class="info-icon" title="親タスク：イベント全体、子タスク：個別のタスク">?</span></label>
+                    <select id="taskType" required>
+                        <option value="parent">親タスク（イベント全体）</option>
+                        <option value="child">子タスク（個別タスク）</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="parentSelectGroup" style="display:none;">
+                    <label>親タスク選択</label>
+                    <select id="parentTask"></select>
+                </div>
+
+                <div class="form-group">
+                    <label>担当者</label>
+                    <input type="text" id="taskAssignee" placeholder="例：奈良先生">
+                </div>
+
+                <div class="form-group">
+                    <label>開始日</label>
+                    <input type="date" id="taskStartDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>終了日</label>
+                    <input type="date" id="taskEndDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>ガントチャートの色</label>
+                    <input type="color" id="taskColor" value="#667eea">
+                </div>
+
+                <div class="form-group">
+                    <label>関連リンク（任意）</label>
+                    <input type="url" id="taskLink" placeholder="https://...">
+                </div>
+
+                <button type="submit" class="btn">保存</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // データ構造
+        let tasks = [
+            // 進級期保護者懇談会
+            {
+                id: 1,
+                name: '進級期保護者懇談会',
+                type: 'parent',
+                assignee: '奈良先生',
+                startDate: '2025-11-01',
+                endDate: '2025-11-22',
+                color: '#4CAF50',
+                link: ''
+            },
+            {
+                id: 2,
+                name: '会場準備',
+                type: 'child',
+                parentId: 1,
+                assignee: '総務チーム',
+                startDate: '2025-11-01',
+                endDate: '2025-11-15',
+                color: '#81C784',
+                link: ''
+            },
+            {
+                id: 3,
+                name: '資料作成',
+                type: 'child',
+                parentId: 1,
+                assignee: '教務チーム',
+                startDate: '2025-11-05',
+                endDate: '2025-11-18',
+                color: '#81C784',
+                link: ''
+            },
+            {
+                id: 4,
+                name: '案内状送付',
+                type: 'child',
+                parentId: 1,
+                assignee: '事務局',
+                startDate: '2025-11-10',
+                endDate: '2025-11-15',
+                color: '#81C784',
+                link: ''
+            },
+            {
+                id: 5,
+                name: '当日運営',
+                type: 'child',
+                parentId: 1,
+                assignee: '全教員',
+                startDate: '2025-11-22',
+                endDate: '2025-11-22',
+                color: '#81C784',
+                link: ''
+            },
+            // ballpark
+            {
+                id: 6,
+                name: 'ballpark',
+                type: 'parent',
+                assignee: '奈良先生',
+                startDate: '2025-11-25',
+                endDate: '2025-12-21',
+                color: '#2196F3',
+                link: ''
+            },
+            {
+                id: 7,
+                name: '企画立案',
+                type: 'child',
+                parentId: 6,
+                assignee: '企画チーム',
+                startDate: '2025-11-25',
+                endDate: '2025-12-05',
+                color: '#64B5F6',
+                link: ''
+            },
+            {
+                id: 8,
+                name: '参加者募集',
+                type: 'child',
+                parentId: 6,
+                assignee: '広報チーム',
+                startDate: '2025-12-01',
+                endDate: '2025-12-15',
+                color: '#64B5F6',
+                link: ''
+            },
+            {
+                id: 9,
+                name: '設営準備',
+                type: 'child',
+                parentId: 6,
+                assignee: '設営チーム',
+                startDate: '2025-12-10',
+                endDate: '2025-12-19',
+                color: '#64B5F6',
+                link: ''
+            },
+            {
+                id: 10,
+                name: 'イベント実施（1日目）',
+                type: 'child',
+                parentId: 6,
+                assignee: '全スタッフ',
+                startDate: '2025-12-20',
+                endDate: '2025-12-20',
+                color: '#64B5F6',
+                link: ''
+            },
+            {
+                id: 11,
+                name: 'イベント実施（2日目）',
+                type: 'child',
+                parentId: 6,
+                assignee: '全スタッフ',
+                startDate: '2025-12-21',
+                endDate: '2025-12-21',
+                color: '#64B5F6',
+                link: ''
+            }
+        ];
+
+        const startDate = new Date('2025-10-01');
+        const endDate = new Date('2025-12-31');
+
+        // 初期化
+        function init() {
+            renderTimeline();
+            renderGantt();
+            renderLegend();
+        }
+
+        // タイムライン描画
+        function renderTimeline() {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+            
+            const months = ['10月', '11月', '12月'];
+            months.forEach(month => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.textContent = month;
+                timeline.appendChild(item);
+            });
+        }
+
+        // ガントチャート描画
+        function renderGantt() {
+            const container = document.getElementById('ganttContainer');
+            container.innerHTML = '';
+
+            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+            tasks.forEach(task => {
+                const row = document.createElement('div');
+                row.className = `gantt-row ${task.type}`;
+
+                // タスク情報
+                const taskInfo = document.createElement('div');
+                taskInfo.className = 'task-info';
+                
+                const taskName = document.createElement('div');
+                taskName.className = 'task-name';
+                taskName.textContent = task.name;
+                if (task.link) {
+                    const link = document.createElement('a');
+                    link.href = task.link;
+                    link.target = '_blank';
+                    link.textContent = ' 🔗';
+                    taskName.appendChild(link);
+                }
+                
+                const taskDetails = document.createElement('div');
+                taskDetails.className = 'task-details';
+                taskDetails.textContent = `担当: ${task.assignee} | ${task.startDate} 〜 ${task.endDate}`;
+                
+                taskInfo.appendChild(taskName);
+                taskInfo.appendChild(taskDetails);
+
+                // ガントチャート
+                const chart = document.createElement('div');
+                chart.className = 'gantt-chart';
+
+                const taskStart = new Date(task.startDate);
+                const taskEnd = new Date(task.endDate);
+                const startOffset = Math.ceil((taskStart - startDate) / (1000 * 60 * 60 * 24));
+                const duration = Math.ceil((taskEnd - taskStart) / (1000 * 60 * 60 * 24)) + 1;
+
+                const bar = document.createElement('div');
+                bar.className = 'gantt-bar';
+                bar.style.left = `${(startOffset / totalDays) * 100}%`;
+                bar.style.width = `${(duration / totalDays) * 100}%`;
+                bar.style.backgroundColor = task.color;
+                bar.textContent = `${duration}日`;
+                bar.onclick = () => editTask(task.id);
+
+                chart.appendChild(bar);
+
+                row.appendChild(taskInfo);
+                row.appendChild(chart);
+                container.appendChild(row);
+            });
+        }
+
+        // 凡例描画
+        function renderLegend() {
+            const legendItems = document.getElementById('legendItems');
+            legendItems.innerHTML = '';
+
+            const parentTasks = tasks.filter(t => t.type === 'parent');
+            
+            parentTasks.forEach(task => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                
+                const color = document.createElement('div');
+                color.className = 'legend-color';
+                color.style.backgroundColor = task.color;
+                
+                const label = document.createElement('span');
+                label.textContent = task.name;
+                
+                item.appendChild(color);
+                item.appendChild(label);
+                legendItems.appendChild(item);
+            });
+        }
+
+        // モーダル制御
+        function addTask() {
+            document.getElementById('taskForm').reset();
+            document.getElementById('taskModal').style.display = 'block';
+            updateParentSelect();
+        }
+
+        function editTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            document.getElementById('taskName').value = task.name;
+            document.getElementById('taskType').value = task.type;
+            document.getElementById('taskAssignee').value = task.assignee;
+            document.getElementById('taskStartDate').value = task.startDate;
+            document.getElementById('taskEndDate').value = task.endDate;
+            document.getElementById('taskColor').value = task.color;
+            document.getElementById('taskLink').value = task.link || '';
+
+            document.getElementById('taskModal').style.display = 'block';
+            updateParentSelect();
+        }
+
+        function closeModal() {
+            document.getElementById('taskModal').style.display = 'none';
+        }
+
+        // タイプ選択時の処理
+        document.getElementById('taskType').addEventListener('change', function() {
+            const parentSelectGroup = document.getElementById('parentSelectGroup');
+            if (this.value === 'child') {
+                parentSelectGroup.style.display = 'block';
+            } else {
+                parentSelectGroup.style.display = 'none';
+            }
+        });
+
+        // 親タスク選択肢更新
+        function updateParentSelect() {
+            const select = document.getElementById('parentTask');
+            select.innerHTML = '';
+            
+            const parentTasks = tasks.filter(t => t.type === 'parent');
+            parentTasks.forEach(task => {
+                const option = document.createElement('option');
+                option.value = task.id;
+                option.textContent = task.name;
+                select.appendChild(option);
+            });
+        }
+
+        // フォーム送信
+        document.getElementById('taskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newTask = {
+                id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+                name: document.getElementById('taskName').value,
+                type: document.getElementById('taskType').value,
+                assignee: document.getElementById('taskAssignee').value,
+                startDate: document.getElementById('taskStartDate').value,
+                endDate: document.getElementById('taskEndDate').value,
+                color: document.getElementById('taskColor').value,
+                link: document.getElementById('taskLink').value
+            };
+
+            if (newTask.type === 'child') {
+                newTask.parentId = parseInt(document.getElementById('parentTask').value);
+            }
+
+            tasks.push(newTask);
+            closeModal();
+            renderGantt();
+            renderLegend();
+            
+            alert('タスクを追加しました！');
+        });
+
+        // データエクスポート
+        function exportData() {
+            const dataStr = JSON.stringify(tasks, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'schedule_data.json';
+            link.click();
+        }
+
+        // データインポート
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        tasks = JSON.parse(event.target.result);
+                        renderGantt();
+                        renderLegend();
+                        alert('データを読み込みました！');
+                    } catch (error) {
+                        alert('データの読み込みに失敗しました。');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // 初期化実行
+        init();
+    </script>
+</body>
+</html>
