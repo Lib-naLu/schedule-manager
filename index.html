@@ -76,7 +76,6 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.9em;
-            margin-left: 10px;
             transition: background 0.2s;
         }
 
@@ -84,149 +83,66 @@
             background: #c82333;
         }
 
-        .gantt-wrapper {
-            position: relative;
-            overflow-x: auto;
-            overflow-y: visible;
-        }
-
-        .gantt-container {
-            padding: 0 30px 30px 0;
-            min-width: fit-content;
-        }
-
-        .gantt-header {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
-
-        .gantt-header-item {
-            font-weight: bold;
-            color: #667eea;
-            padding: 10px;
-        }
-
-        .gantt-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 10px;
+        .legend {
+            padding: 20px 30px;
             background: #f8f9fa;
-            border-radius: 8px;
-            transition: background 0.2s;
-            position: relative;
+            border-bottom: 2px solid #e9ecef;
         }
 
-        .gantt-row:hover {
-            background: #e9ecef;
-        }
-
-        .gantt-row.parent {
-            background: #e7e9fc;
+        .legend-title {
             font-weight: bold;
-            cursor: pointer;
-        }
-
-        .gantt-row.parent:hover {
-            background: #d4d7f5;
-        }
-
-        .gantt-row.child {
-            margin-left: 30px;
-            background: #f8f9fa;
-        }
-
-        .gantt-row.child.hidden {
-            display: none;
-        }
-
-        .task-info {
-            min-width: 250px;
-            max-width: 250px;
-            padding-right: 20px;
-            position: sticky;
-            left: 0;
-            background: inherit;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .task-content {
-            flex: 1;
-        }
-
-        .task-name {
-            font-size: 1.1em;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .task-name::before {
-            content: '▼ ';
-            font-size: 0.8em;
-            margin-right: 5px;
-        }
-
-        .gantt-row.parent.collapsed .task-name::before {
-            content: '▶ ';
-        }
-
-        .task-details {
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        .gantt-chart {
-            flex: 1;
-            position: relative;
-            height: 40px;
-            background: white;
-            border-radius: 5px;
-        }
-
-        .gantt-bar {
-            position: absolute;
-            height: 30px;
-            top: 5px;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.85em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .gantt-bar:hover {
-            opacity: 0.9;
-        }
-
-        .timeline-wrapper {
-            position: relative;
-            overflow-x: auto;
             margin-bottom: 10px;
+            color: #006888;
+            font-size: 1.1em;
         }
 
-        .timeline {
+        .legend-items {
             display: flex;
-            padding: 0 30px 0 0;
-            padding-left: 280px;
-            min-width: fit-content;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        /* 分離レイアウト */
+        .gantt-split-container {
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* 左側：タスク情報列（固定） */
+        .task-list-column {
+            min-width: 300px;
+            max-width: 300px;
+            background: #f8f9fa;
+            border-right: 3px solid #006888;
+            overflow-y: auto;
+        }
+
+        /* 右側：カレンダー＋ガントチャート（スクロール） */
+        .calendar-gantt-column {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: auto;
         }
 
         .month-header {
             display: flex;
-            padding: 0 30px 0 0;
-            padding-left: 280px;
             min-width: fit-content;
-            margin-bottom: 5px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: white;
         }
 
         .month-item {
@@ -242,6 +158,16 @@
 
         .month-item:last-child {
             border-right: 1px solid #006888;
+        }
+
+        .timeline {
+            display: flex;
+            min-width: fit-content;
+            position: sticky;
+            top: 44px;
+            z-index: 50;
+            background: white;
+            border-bottom: 2px solid #006888;
         }
 
         .timeline-item {
@@ -268,6 +194,108 @@
 
         .timeline-item.weekend {
             background: #f0f8ff;
+        }
+
+        /* タスク行 */
+        .task-row {
+            min-height: 60px;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+        }
+
+        .task-row:hover {
+            background: #f8f9fa;
+        }
+
+        .task-row.parent {
+            background: #e7e9fc;
+        }
+
+        .task-row.parent:hover {
+            background: #d4d7f5;
+        }
+
+        .task-row.child {
+            background: #fafafa;
+        }
+
+        .task-row.child.hidden {
+            display: none;
+        }
+
+        /* タスク情報部分 */
+        .task-info {
+            padding: 10px 15px;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .task-info-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .task-name {
+            font-size: 1em;
+            color: #333;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .task-row.parent .task-name::before {
+            content: '▼ ';
+            font-size: 0.8em;
+            margin-right: 5px;
+        }
+
+        .task-row.parent.collapsed .task-name::before {
+            content: '▶ ';
+        }
+
+        .task-row.child .task-name {
+            padding-left: 20px;
+            font-weight: 400;
+        }
+
+        .task-details {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        /* ガントチャート部分 */
+        .gantt-chart-area {
+            min-width: fit-content;
+            padding: 10px 0;
+        }
+
+        .gantt-chart-row {
+            position: relative;
+            height: 40px;
+            min-height: 40px;
+        }
+
+        .gantt-bar {
+            position: absolute;
+            height: 30px;
+            top: 5px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .gantt-bar:hover {
+            opacity: 0.9;
         }
 
         .modal {
@@ -354,42 +382,6 @@
             cursor: pointer;
         }
 
-        .legend {
-            padding: 20px 30px;
-            background: #f8f9fa;
-            border-top: 2px solid #e9ecef;
-        }
-
-        .legend-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #667eea;
-        }
-
-        .legend-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .legend-color {
-            width: 30px;
-            height: 20px;
-            border-radius: 4px;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
         .info-icon {
             display: inline-block;
             width: 20px;
@@ -402,6 +394,17 @@
             font-size: 0.8em;
             cursor: help;
             margin-left: 5px;
+        }
+
+        .empty-state {
+            padding: 60px 30px;
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-state p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -416,18 +419,28 @@
             <button class="btn" onclick="addTask()">➕ 新規タスク追加</button>
         </div>
 
-        <div class="timeline-wrapper">
-            <div class="month-header" id="monthHeader"></div>
-            <div class="timeline" id="timeline"></div>
-        </div>
-
-        <div class="gantt-wrapper">
-            <div class="gantt-container" id="ganttContainer"></div>
-        </div>
-
         <div class="legend">
             <div class="legend-title">凡例</div>
-            <div class="legend-items" id="legendItems"></div>
+            <div class="legend-items" id="legendItems">
+                <span style="color: #999;">タスクが登録されていません</span>
+            </div>
+        </div>
+
+        <div class="gantt-split-container">
+            <!-- 左側：タスク情報列 -->
+            <div class="task-list-column" id="taskListColumn">
+                <div class="empty-state">
+                    <p>📋 タスクがありません</p>
+                    <p style="font-size: 0.9em;">「新規タスク追加」ボタンからタスクを作成してください</p>
+                </div>
+            </div>
+
+            <!-- 右側：カレンダー＋ガントチャート -->
+            <div class="calendar-gantt-column" id="calendarGanttColumn">
+                <div class="month-header" id="monthHeader"></div>
+                <div class="timeline" id="timeline"></div>
+                <div class="gantt-chart-area" id="ganttChartArea"></div>
+            </div>
         </div>
     </div>
 
@@ -486,142 +499,18 @@
     </div>
 
     <script>
-        // データ構造
-        let tasks = [
-            // 進級期保護者懇談会
-            {
-                id: 1,
-                name: '進級期保護者懇談会',
-                type: 'parent',
-                assignee: '奈良先生',
-                startDate: '2025-11-01',
-                endDate: '2025-11-22',
-                color: '#4CAF50',
-                link: '',
-                collapsed: false
-            },
-            {
-                id: 2,
-                name: '会場準備',
-                type: 'child',
-                parentId: 1,
-                assignee: '総務チーム',
-                startDate: '2025-11-01',
-                endDate: '2025-11-15',
-                color: '#81C784',
-                link: ''
-            },
-            {
-                id: 3,
-                name: '資料作成',
-                type: 'child',
-                parentId: 1,
-                assignee: '教務チーム',
-                startDate: '2025-11-05',
-                endDate: '2025-11-18',
-                color: '#81C784',
-                link: ''
-            },
-            {
-                id: 4,
-                name: '案内状送付',
-                type: 'child',
-                parentId: 1,
-                assignee: '事務局',
-                startDate: '2025-11-10',
-                endDate: '2025-11-15',
-                color: '#81C784',
-                link: ''
-            },
-            {
-                id: 5,
-                name: '当日運営',
-                type: 'child',
-                parentId: 1,
-                assignee: '全教員',
-                startDate: '2025-11-22',
-                endDate: '2025-11-22',
-                color: '#81C784',
-                link: ''
-            },
-            // ballpark
-            {
-                id: 6,
-                name: 'ballpark',
-                type: 'parent',
-                assignee: '奈良先生',
-                startDate: '2025-11-25',
-                endDate: '2025-12-21',
-                color: '#2196F3',
-                link: '',
-                collapsed: false
-            },
-            {
-                id: 7,
-                name: '企画立案',
-                type: 'child',
-                parentId: 6,
-                assignee: '企画チーム',
-                startDate: '2025-11-25',
-                endDate: '2025-12-05',
-                color: '#64B5F6',
-                link: ''
-            },
-            {
-                id: 8,
-                name: '参加者募集',
-                type: 'child',
-                parentId: 6,
-                assignee: '広報チーム',
-                startDate: '2025-12-01',
-                endDate: '2025-12-15',
-                color: '#64B5F6',
-                link: ''
-            },
-            {
-                id: 9,
-                name: '設営準備',
-                type: 'child',
-                parentId: 6,
-                assignee: '設営チーム',
-                startDate: '2025-12-10',
-                endDate: '2025-12-19',
-                color: '#64B5F6',
-                link: ''
-            },
-            {
-                id: 10,
-                name: 'イベント実施(1日目)',
-                type: 'child',
-                parentId: 6,
-                assignee: '全スタッフ',
-                startDate: '2025-12-20',
-                endDate: '2025-12-20',
-                color: '#64B5F6',
-                link: ''
-            },
-            {
-                id: 11,
-                name: 'イベント実施(2日目)',
-                type: 'child',
-                parentId: 6,
-                assignee: '全スタッフ',
-                startDate: '2025-12-21',
-                endDate: '2025-12-21',
-                color: '#64B5F6',
-                link: ''
-            }
-        ];
+        // データ構造（サンプルデータなし）
+        let tasks = [];
 
         const startDate = new Date('2025-10-01');
         const endDate = new Date('2025-12-31');
+        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
 
         // 初期化
         function init() {
             renderMonthHeader();
             renderTimeline();
-            renderGantt();
-            renderLegend();
+            renderAll();
         }
 
         // 月ヘッダー描画
@@ -650,7 +539,6 @@
             const timeline = document.getElementById('timeline');
             timeline.innerHTML = '';
             
-            // 2025年10月1日から12月31日までの日付を生成
             const currentDate = new Date('2025-10-01');
             const end = new Date('2025-12-31');
             
@@ -661,51 +549,74 @@
                 const day = currentDate.getDate();
                 const dayOfWeek = currentDate.getDay();
                 
-                // 土日の場合は背景色を変更
                 if (dayOfWeek === 0 || dayOfWeek === 6) {
                     item.classList.add('weekend');
                 }
                 
                 item.textContent = day;
-                
                 timeline.appendChild(item);
                 currentDate.setDate(currentDate.getDate() + 1);
             }
         }
 
-        // ガントチャート描画
-        function renderGantt() {
-            const container = document.getElementById('ganttContainer');
-            container.innerHTML = '';
+        // 全体描画
+        function renderAll() {
+            if (tasks.length === 0) {
+                renderEmpty();
+            } else {
+                renderTaskList();
+                renderGanttChart();
+            }
+            renderLegend();
+        }
 
-            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        // 空状態の描画
+        function renderEmpty() {
+            const taskListColumn = document.getElementById('taskListColumn');
+            taskListColumn.innerHTML = `
+                <div class="empty-state">
+                    <p>📋 タスクがありません</p>
+                    <p style="font-size: 0.9em;">「新規タスク追加」ボタンからタスクを作成してください</p>
+                </div>
+            `;
+            
+            const ganttChartArea = document.getElementById('ganttChartArea');
+            ganttChartArea.innerHTML = '';
+        }
+
+        // タスクリスト描画（左側）
+        function renderTaskList() {
+            const taskListColumn = document.getElementById('taskListColumn');
+            taskListColumn.innerHTML = '';
 
             tasks.forEach(task => {
-                const row = document.createElement('div');
-                row.className = `gantt-row ${task.type}`;
-                row.dataset.taskId = task.id;
-                
-                if (task.type === 'parent' && task.collapsed) {
-                    row.classList.add('collapsed');
-                }
-                
                 if (task.type === 'child') {
                     const parent = tasks.find(t => t.id === task.parentId);
                     if (parent && parent.collapsed) {
-                        row.classList.add('hidden');
+                        return;
                     }
                 }
 
-                // タスク情報
+                const taskRow = document.createElement('div');
+                taskRow.className = `task-row ${task.type}`;
+                if (task.type === 'parent' && task.collapsed) {
+                    taskRow.classList.add('collapsed');
+                }
+
                 const taskInfo = document.createElement('div');
                 taskInfo.className = 'task-info';
-                
-                const taskContent = document.createElement('div');
-                taskContent.className = 'task-content';
-                
+
+                const taskInfoHeader = document.createElement('div');
+                taskInfoHeader.className = 'task-info-header';
+
                 const taskName = document.createElement('div');
                 taskName.className = 'task-name';
                 taskName.textContent = task.name;
+                
+                if (task.type === 'parent') {
+                    taskName.onclick = () => toggleCollapse(task.id);
+                }
+
                 if (task.link) {
                     const link = document.createElement('a');
                     link.href = task.link;
@@ -714,16 +625,7 @@
                     link.onclick = (e) => e.stopPropagation();
                     taskName.appendChild(link);
                 }
-                
-                const taskDetails = document.createElement('div');
-                taskDetails.className = 'task-details';
-                taskDetails.textContent = `担当: ${task.assignee} | ${task.startDate} 〜 ${task.endDate}`;
-                
-                taskContent.appendChild(taskName);
-                taskContent.appendChild(taskDetails);
-                taskInfo.appendChild(taskContent);
-                
-                // 削除ボタン
+
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'btn-delete';
                 deleteBtn.textContent = '削除';
@@ -731,16 +633,37 @@
                     e.stopPropagation();
                     deleteTask(task.id);
                 };
-                taskInfo.appendChild(deleteBtn);
 
-                // 親タスクのクリックで折りたたみ切り替え
-                if (task.type === 'parent') {
-                    row.onclick = () => toggleCollapse(task.id);
+                taskInfoHeader.appendChild(taskName);
+                taskInfoHeader.appendChild(deleteBtn);
+
+                const taskDetails = document.createElement('div');
+                taskDetails.className = 'task-details';
+                taskDetails.textContent = `担当: ${task.assignee} | ${task.startDate} 〜 ${task.endDate}`;
+
+                taskInfo.appendChild(taskInfoHeader);
+                taskInfo.appendChild(taskDetails);
+                taskRow.appendChild(taskInfo);
+                taskListColumn.appendChild(taskRow);
+            });
+        }
+
+        // ガントチャート描画（右側）
+        function renderGanttChart() {
+            const ganttChartArea = document.getElementById('ganttChartArea');
+            ganttChartArea.innerHTML = '';
+
+            tasks.forEach(task => {
+                if (task.type === 'child') {
+                    const parent = tasks.find(t => t.id === task.parentId);
+                    if (parent && parent.collapsed) {
+                        return;
+                    }
                 }
 
-                // ガントチャート
-                const chart = document.createElement('div');
-                chart.className = 'gantt-chart';
+                const chartRow = document.createElement('div');
+                chartRow.className = 'gantt-chart-row';
+                chartRow.style.minWidth = (totalDays * 30) + 'px';
 
                 const taskStart = new Date(task.startDate);
                 const taskEnd = new Date(task.endDate);
@@ -749,19 +672,13 @@
 
                 const bar = document.createElement('div');
                 bar.className = 'gantt-bar';
-                bar.style.left = `${(startOffset / totalDays) * 100}%`;
-                bar.style.width = `${(duration / totalDays) * 100}%`;
+                bar.style.left = `${startOffset * 30}px`;
+                bar.style.width = `${duration * 30}px`;
                 bar.style.backgroundColor = task.color;
-                bar.onclick = (e) => {
-                    e.stopPropagation();
-                    editTask(task.id);
-                };
+                bar.onclick = () => editTask(task.id);
 
-                chart.appendChild(bar);
-
-                row.appendChild(taskInfo);
-                row.appendChild(chart);
-                container.appendChild(row);
+                chartRow.appendChild(bar);
+                ganttChartArea.appendChild(chartRow);
             });
         }
 
@@ -771,7 +688,7 @@
             if (!parent || parent.type !== 'parent') return;
             
             parent.collapsed = !parent.collapsed;
-            renderGantt();
+            renderAll();
         }
 
         // タスク削除
@@ -787,7 +704,6 @@
                     if (!confirm(`「${taskName}」には${childCount}個の子タスクがあります。親タスクと一緒に全て削除しますか?`)) {
                         return;
                     }
-                    // 子タスクも削除
                     tasks = tasks.filter(t => t.parentId !== taskId && t.id !== taskId);
                 } else {
                     if (!confirm(`「${taskName}」を削除しますか?`)) {
@@ -802,8 +718,7 @@
                 tasks = tasks.filter(t => t.id !== taskId);
             }
             
-            renderGantt();
-            renderLegend();
+            renderAll();
         }
 
         // 凡例描画
@@ -812,6 +727,11 @@
             legendItems.innerHTML = '';
 
             const parentTasks = tasks.filter(t => t.type === 'parent');
+            
+            if (parentTasks.length === 0) {
+                legendItems.innerHTML = '<span style="color: #999;">タスクが登録されていません</span>';
+                return;
+            }
             
             parentTasks.forEach(task => {
                 const item = document.createElement('div');
@@ -835,6 +755,14 @@
             document.getElementById('taskForm').reset();
             document.getElementById('taskModal').style.display = 'block';
             updateParentSelect();
+            
+            // デフォルト日付を設定
+            const today = new Date();
+            const defaultStart = new Date(2025, 9, 1); // 2025年10月1日
+            const defaultEnd = new Date(2025, 9, 7);   // 2025年10月7日
+            
+            document.getElementById('taskStartDate').value = defaultStart.toISOString().split('T')[0];
+            document.getElementById('taskEndDate').value = defaultEnd.toISOString().split('T')[0];
         }
 
         function editTask(taskId) {
@@ -873,6 +801,14 @@
             select.innerHTML = '';
             
             const parentTasks = tasks.filter(t => t.type === 'parent');
+            
+            if (parentTasks.length === 0) {
+                const option = document.createElement('option');
+                option.textContent = '親タスクがありません';
+                select.appendChild(option);
+                return;
+            }
+            
             parentTasks.forEach(task => {
                 const option = document.createElement('option');
                 option.value = task.id;
@@ -885,10 +821,21 @@
         document.getElementById('taskForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            const taskType = document.getElementById('taskType').value;
+            
+            // 子タスクの場合、親タスクが存在するかチェック
+            if (taskType === 'child') {
+                const parentTasks = tasks.filter(t => t.type === 'parent');
+                if (parentTasks.length === 0) {
+                    alert('子タスクを作成する前に、親タスクを作成してください。');
+                    return;
+                }
+            }
+            
             const newTask = {
                 id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
                 name: document.getElementById('taskName').value,
-                type: document.getElementById('taskType').value,
+                type: taskType,
                 assignee: document.getElementById('taskAssignee').value,
                 startDate: document.getElementById('taskStartDate').value,
                 endDate: document.getElementById('taskEndDate').value,
@@ -906,8 +853,7 @@
 
             tasks.push(newTask);
             closeModal();
-            renderGantt();
-            renderLegend();
+            renderAll();
             
             alert('タスクを追加しました!');
         });
