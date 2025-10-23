@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1e90ff;
+            background: #006888;
             min-height: 100vh;
             padding: 20px;
         }
@@ -29,7 +29,7 @@
         }
 
         .header {
-            background: #1e90ff;
+            background: #006888;
             color: white;
             padding: 30px;
             text-align: center;
@@ -49,10 +49,13 @@
             padding: 20px 30px;
             background: #f8f9fa;
             border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            left: 0;
+            z-index: 100;
         }
 
         .btn {
-            background: #1e90ff;
+            background: #006888;
             color: white;
             border: none;
             padding: 12px 24px;
@@ -94,6 +97,14 @@
             background: #f8f9fa;
             border-radius: 8px;
             transition: background 0.2s;
+            position: relative;
+        }
+
+        .gantt-row .task-info {
+            position: sticky;
+            left: 0;
+            background: inherit;
+            z-index: 5;
         }
 
         .gantt-row:hover {
@@ -111,7 +122,8 @@
         }
 
         .task-info {
-            min-width: 350px;
+            min-width: 250px;
+            max-width: 250px;
             padding-right: 20px;
         }
 
@@ -158,17 +170,21 @@
             display: flex;
             margin-bottom: 10px;
             padding: 0 30px;
-            padding-left: 380px;
+            padding-left: 280px;
         }
 
         .timeline-item {
-            flex: 1;
+            min-width: 30px;
             text-align: center;
-            padding: 5px;
-            font-size: 0.9em;
-            color: #667eea;
+            padding: 5px 2px;
+            font-size: 0.75em;
+            color: #006888;
             font-weight: bold;
             border-right: 1px solid #dee2e6;
+        }
+
+        .timeline-item.weekend {
+            background: #f0f8ff;
         }
 
         .modal {
@@ -309,14 +325,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📅 Event Timeline Manager</h1>
+            <h1>Event Timeline Manager</h1>
             <p>2025年10月 〜 2025年12月</p>
         </div>
 
         <div class="controls">
             <button class="btn" onclick="addTask()">➕ 新規タスク追加</button>
-            <button class="btn" onclick="exportData()">💾 データ保存</button>
-            <button class="btn" onclick="importData()">📂 データ読込</button>
         </div>
 
         <div class="timeline" id="timeline"></div>
@@ -519,18 +533,40 @@
             renderLegend();
         }
 
-        // タイムライン描画
+        // タイムライン描画（日別）
         function renderTimeline() {
             const timeline = document.getElementById('timeline');
             timeline.innerHTML = '';
             
-            const months = ['10月', '11月', '12月'];
-            months.forEach(month => {
+            // 2025年10月1日から12月31日までの日付を生成
+            const currentDate = new Date('2025-10-01');
+            const end = new Date('2025-12-31');
+            
+            while (currentDate <= end) {
                 const item = document.createElement('div');
                 item.className = 'timeline-item';
-                item.textContent = month;
+                
+                const day = currentDate.getDate();
+                const dayOfWeek = currentDate.getDay();
+                
+                // 土日の場合は背景色を変更
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    item.classList.add('weekend');
+                }
+                
+                // 1日の場合は月も表示
+                if (day === 1) {
+                    const month = currentDate.getMonth() + 1;
+                    item.textContent = `${month}/${day}`;
+                    item.style.fontWeight = 'bold';
+                    item.style.borderLeft = '2px solid #006888';
+                } else {
+                    item.textContent = day;
+                }
+                
                 timeline.appendChild(item);
-            });
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
         }
 
         // ガントチャート描画
