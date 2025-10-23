@@ -122,35 +122,42 @@
             border-radius: 4px;
         }
 
-        /* 分離レイアウト */
-        .gantt-split-container {
+        /* 新しいレイアウト構造 */
+        .gantt-layout {
             display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
 
-        /* 左側：タスク情報列（固定） */
-        .task-list-column {
-            min-width: 300px;
-            max-width: 300px;
-            background: #fafafa;
-            border-right: 3px solid #006888;
-            overflow-y: auto;
+        /* カレンダーヘッダー部分 */
+        .calendar-header-wrapper {
+            display: flex;
+            border-bottom: 3px solid #006888;
         }
 
-        /* 右側：カレンダー＋ガントチャート（スクロール） */
-        .calendar-gantt-column {
+        .task-header {
+            min-width: 300px;
+            max-width: 300px;
+            background: #006888;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+            border-right: 3px solid #004d66;
+        }
+
+        .calendar-header-scroll {
             flex: 1;
-            overflow-x: auto;
-            overflow-y: auto;
-            background: #fff;
+            overflow-x: hidden;
+        }
+
+        .calendar-headers {
+            min-width: fit-content;
         }
 
         .month-header {
             display: flex;
             min-width: fit-content;
-            position: sticky;
-            top: 0;
-            z-index: 50;
             background: white;
             border-bottom: 2px solid #006888;
         }
@@ -172,11 +179,7 @@
         .timeline {
             display: flex;
             min-width: fit-content;
-            position: sticky;
-            top: 46px;
-            z-index: 50;
             background: white;
-            border-bottom: 2px solid #006888;
         }
 
         .timeline-item {
@@ -191,68 +194,75 @@
             background: #f8f9fa;
         }
 
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 100%;
-            width: 1px;
-            height: 3000px;
-            background: #e0e0e0;
-            z-index: 1;
-        }
-
         .timeline-item.weekend {
             background: #e3f2fd;
             color: #1976d2;
         }
 
-        /* タスク行 */
-        .task-row {
-            min-height: 60px;
-            border-bottom: 1px solid #e0e0e0;
-            background: white;
+        /* タスクとガントチャートの統合エリア */
+        .gantt-content-wrapper {
+            display: flex;
+            overflow: auto;
+            max-height: 600px;
         }
 
-        .task-row:nth-child(even) {
+        .task-list-fixed {
+            min-width: 300px;
+            max-width: 300px;
+            background: #fafafa;
+            border-right: 3px solid #006888;
+            overflow: visible;
+        }
+
+        .gantt-chart-scroll {
+            flex: 1;
+            overflow: visible;
+            background: #fff;
+        }
+
+        .gantt-row-container {
+            display: flex;
+            min-height: 60px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .gantt-row-container:nth-child(even) .task-info,
+        .gantt-row-container:nth-child(even) .gantt-chart-row {
             background: #fafafa;
         }
 
-        .task-row:hover {
-            background: #f0f0f0;
-        }
-
-        .task-row.parent {
+        .gantt-row-container.parent .task-info,
+        .gantt-row-container.parent .gantt-chart-row {
             background: #e7f3ff;
         }
 
-        .task-row.parent:nth-child(even) {
+        .gantt-row-container.parent:nth-child(even) .task-info,
+        .gantt-row-container.parent:nth-child(even) .gantt-chart-row {
             background: #d6ebff;
         }
 
-        .task-row.parent:hover {
+        .gantt-row-container:hover .task-info,
+        .gantt-row-container:hover .gantt-chart-row {
+            background: #f0f0f0;
+        }
+
+        .gantt-row-container.parent:hover .task-info,
+        .gantt-row-container.parent:hover .gantt-chart-row {
             background: #c5e1ff;
         }
 
-        .task-row.child {
-            background: white;
-        }
-
-        .task-row.child:nth-child(even) {
-            background: #fafafa;
-        }
-
-        .task-row.child.hidden {
+        .gantt-row-container.child.hidden {
             display: none;
         }
 
         /* タスク情報部分 */
         .task-info {
+            width: 300px;
             padding: 10px 15px;
-            min-height: 60px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            background: white;
         }
 
         .task-info-header {
@@ -267,19 +277,20 @@
             color: #333;
             font-weight: 600;
             cursor: pointer;
+            flex: 1;
         }
 
-        .task-row.parent .task-name::before {
+        .gantt-row-container.parent .task-name::before {
             content: '▼ ';
             font-size: 0.8em;
             margin-right: 5px;
         }
 
-        .task-row.parent.collapsed .task-name::before {
+        .gantt-row-container.parent.collapsed .task-name::before {
             content: '▶ ';
         }
 
-        .task-row.child .task-name {
+        .gantt-row-container.child .task-name {
             padding-left: 20px;
             font-weight: 400;
         }
@@ -290,30 +301,21 @@
         }
 
         /* ガントチャート部分 */
-        .gantt-chart-area {
-            min-width: fit-content;
-            padding: 0;
-            position: relative;
-        }
-
         .gantt-chart-row {
             position: relative;
-            height: 60px;
             min-height: 60px;
-            border-bottom: 1px solid #e0e0e0;
             background: white;
         }
 
-        .gantt-chart-row:nth-child(even) {
-            background: #fafafa;
-        }
-
-        .gantt-chart-row.parent {
-            background: #e7f3ff;
-        }
-
-        .gantt-chart-row.parent:nth-child(even) {
-            background: #d6ebff;
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 1px;
+            height: 3000px;
+            background: #e0e0e0;
+            z-index: 1;
         }
 
         .gantt-bar {
@@ -472,13 +474,6 @@
             box-shadow: 0 0 0 2px white, 0 0 0 4px #006888;
         }
 
-        .color-preset-label {
-            font-size: 0.75em;
-            text-align: center;
-            margin-top: 5px;
-            color: #666;
-        }
-
         .info-icon {
             display: inline-block;
             width: 20px;
@@ -509,7 +504,7 @@
     <div class="container">
         <div class="header">
             <h1 id="toolTitle" onclick="editToolTitle()">Event Timeline Manager</h1>
-            <p>2025年10月 〜 2025年12月</p>
+            <p id="dateRange">期間が設定されていません</p>
         </div>
 
         <div class="controls">
@@ -523,20 +518,28 @@
             </div>
         </div>
 
-        <div class="gantt-split-container">
-            <!-- 左側：タスク情報列 -->
-            <div class="task-list-column" id="taskListColumn">
-                <div class="empty-state">
-                    <p>📋 タスクがありません</p>
-                    <p style="font-size: 0.9em;">「新規タスク追加」ボタンからタスクを作成してください</p>
+        <div class="gantt-layout">
+            <!-- カレンダーヘッダー -->
+            <div class="calendar-header-wrapper">
+                <div class="task-header">タスク一覧</div>
+                <div class="calendar-header-scroll" id="calendarHeaderScroll">
+                    <div class="calendar-headers" id="calendarHeaders">
+                        <div class="month-header" id="monthHeader"></div>
+                        <div class="timeline" id="timeline"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 右側：カレンダー＋ガントチャート -->
-            <div class="calendar-gantt-column" id="calendarGanttColumn">
-                <div class="month-header" id="monthHeader"></div>
-                <div class="timeline" id="timeline"></div>
-                <div class="gantt-chart-area" id="ganttChartArea"></div>
+            <!-- タスクとガントチャートの統合エリア -->
+            <div class="gantt-content-wrapper" id="ganttContentWrapper">
+                <div class="task-list-fixed" id="taskListFixed">
+                    <div class="empty-state">
+                        <p>📋 タスクがありません</p>
+                        <p style="font-size: 0.9em;">「新規タスク追加」ボタンから<br>タスクを作成してください</p>
+                    </div>
+                </div>
+                <div class="gantt-chart-scroll" id="ganttChartScroll">
+                </div>
             </div>
         </div>
     </div>
@@ -621,18 +624,18 @@
         // データ構造
         let tasks = [];
         let toolTitle = 'Event Timeline Manager';
-
-        const startDate = new Date('2025-10-01');
-        const endDate = new Date('2025-12-31');
-        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        let calendarStartDate = null;
+        let calendarEndDate = null;
+        let totalDays = 0;
 
         // 初期化
         function init() {
             loadToolTitle();
             renderColorPresets();
-            renderMonthHeader();
-            renderTimeline();
+            calculateCalendarRange();
+            renderCalendar();
             renderAll();
+            syncScroll();
         }
 
         // ツール名称の読み込み
@@ -696,16 +699,74 @@
             }
         }
 
+        // カレンダー範囲の計算
+        function calculateCalendarRange() {
+            if (tasks.length === 0) {
+                // タスクがない場合はデフォルト期間
+                calendarStartDate = new Date('2025-10-01');
+                calendarEndDate = new Date('2025-12-31');
+            } else {
+                // 全タスクの最小開始日と最大終了日を取得
+                let minDate = new Date(tasks[0].startDate);
+                let maxDate = new Date(tasks[0].endDate);
+                
+                tasks.forEach(task => {
+                    const start = new Date(task.startDate);
+                    const end = new Date(task.endDate);
+                    if (start < minDate) minDate = start;
+                    if (end > maxDate) maxDate = end;
+                });
+                
+                // 月の初日と末日に調整
+                calendarStartDate = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+                calendarEndDate = new Date(maxDate.getFullYear(), maxDate.getMonth() + 1, 0);
+            }
+            
+            totalDays = Math.ceil((calendarEndDate - calendarStartDate) / (1000 * 60 * 60 * 24)) + 1;
+            
+            // ヘッダーの期間表示を更新
+            const startStr = `${calendarStartDate.getFullYear()}年${calendarStartDate.getMonth() + 1}月`;
+            const endStr = `${calendarEndDate.getFullYear()}年${calendarEndDate.getMonth() + 1}月`;
+            document.getElementById('dateRange').textContent = `${startStr} 〜 ${endStr}`;
+        }
+
+        // カレンダー描画
+        function renderCalendar() {
+            renderMonthHeader();
+            renderTimeline();
+        }
+
         // 月ヘッダー描画
         function renderMonthHeader() {
             const monthHeader = document.getElementById('monthHeader');
             monthHeader.innerHTML = '';
             
-            const months = [
-                { name: '10月', days: 31 },
-                { name: '11月', days: 30 },
-                { name: '12月', days: 31 }
-            ];
+            const currentMonth = new Date(calendarStartDate);
+            const months = [];
+            
+            while (currentMonth <= calendarEndDate) {
+                const year = currentMonth.getFullYear();
+                const month = currentMonth.getMonth();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                // カレンダー範囲内の日数を計算
+                let visibleDays = daysInMonth;
+                if (currentMonth.getTime() === new Date(calendarStartDate.getFullYear(), calendarStartDate.getMonth(), 1).getTime()) {
+                    visibleDays = daysInMonth - calendarStartDate.getDate() + 1;
+                }
+                if (year === calendarEndDate.getFullYear() && month === calendarEndDate.getMonth()) {
+                    const startDay = (currentMonth.getTime() === new Date(calendarStartDate.getFullYear(), calendarStartDate.getMonth(), 1).getTime()) 
+                        ? calendarStartDate.getDate() : 1;
+                    visibleDays = calendarEndDate.getDate() - startDay + 1;
+                }
+                
+                months.push({
+                    name: `${month + 1}月`,
+                    days: visibleDays
+                });
+                
+                currentMonth.setMonth(currentMonth.getMonth() + 1);
+            }
             
             months.forEach(month => {
                 const item = document.createElement('div');
@@ -722,10 +783,9 @@
             const timeline = document.getElementById('timeline');
             timeline.innerHTML = '';
             
-            const currentDate = new Date('2025-10-01');
-            const end = new Date('2025-12-31');
+            const currentDate = new Date(calendarStartDate);
             
-            while (currentDate <= end) {
+            while (currentDate <= calendarEndDate) {
                 const item = document.createElement('div');
                 item.className = 'timeline-item';
                 
@@ -742,35 +802,48 @@
             }
         }
 
+        // スクロール同期
+        function syncScroll() {
+            const contentWrapper = document.getElementById('ganttContentWrapper');
+            const headerScroll = document.getElementById('calendarHeaderScroll');
+            
+            // 横スクロール同期
+            contentWrapper.addEventListener('scroll', function() {
+                headerScroll.scrollLeft = this.scrollLeft;
+            });
+        }
+
         // 全体描画
         function renderAll() {
             if (tasks.length === 0) {
                 renderEmpty();
             } else {
-                renderTaskList();
-                renderGanttChart();
+                renderTasksAndGantt();
             }
             renderLegend();
         }
 
         // 空状態の描画
         function renderEmpty() {
-            const taskListColumn = document.getElementById('taskListColumn');
-            taskListColumn.innerHTML = `
+            const taskListFixed = document.getElementById('taskListFixed');
+            taskListFixed.innerHTML = `
                 <div class="empty-state">
                     <p>📋 タスクがありません</p>
-                    <p style="font-size: 0.9em;">「新規タスク追加」ボタンからタスクを作成してください</p>
+                    <p style="font-size: 0.9em;">「新規タスク追加」ボタンから<br>タスクを作成してください</p>
                 </div>
             `;
             
-            const ganttChartArea = document.getElementById('ganttChartArea');
-            ganttChartArea.innerHTML = '';
+            const ganttChartScroll = document.getElementById('ganttChartScroll');
+            ganttChartScroll.innerHTML = '';
         }
 
-        // タスクリスト描画（左側）
-        function renderTaskList() {
-            const taskListColumn = document.getElementById('taskListColumn');
-            taskListColumn.innerHTML = '';
+        // タスクとガントチャートを統合して描画
+        function renderTasksAndGantt() {
+            const taskListFixed = document.getElementById('taskListFixed');
+            const ganttChartScroll = document.getElementById('ganttChartScroll');
+            
+            taskListFixed.innerHTML = '';
+            ganttChartScroll.innerHTML = '';
 
             tasks.forEach(task => {
                 if (task.type === 'child') {
@@ -780,12 +853,7 @@
                     }
                 }
 
-                const taskRow = document.createElement('div');
-                taskRow.className = `task-row ${task.type}`;
-                if (task.type === 'parent' && task.collapsed) {
-                    taskRow.classList.add('collapsed');
-                }
-
+                // タスク情報（左側）
                 const taskInfo = document.createElement('div');
                 taskInfo.className = 'task-info';
 
@@ -830,31 +898,15 @@
 
                 taskInfo.appendChild(taskInfoHeader);
                 taskInfo.appendChild(taskDetails);
-                taskRow.appendChild(taskInfo);
-                taskListColumn.appendChild(taskRow);
-            });
-        }
 
-        // ガントチャート描画（右側）
-        function renderGanttChart() {
-            const ganttChartArea = document.getElementById('ganttChartArea');
-            ganttChartArea.innerHTML = '';
-
-            tasks.forEach(task => {
-                if (task.type === 'child') {
-                    const parent = tasks.find(t => t.id === task.parentId);
-                    if (parent && parent.collapsed) {
-                        return;
-                    }
-                }
-
+                // ガントチャート（右側）
                 const chartRow = document.createElement('div');
-                chartRow.className = `gantt-chart-row ${task.type}`;
+                chartRow.className = 'gantt-chart-row';
                 chartRow.style.minWidth = (totalDays * 40) + 'px';
 
                 const taskStart = new Date(task.startDate);
                 const taskEnd = new Date(task.endDate);
-                const startOffset = Math.ceil((taskStart - startDate) / (1000 * 60 * 60 * 24));
+                const startOffset = Math.ceil((taskStart - calendarStartDate) / (1000 * 60 * 60 * 24));
                 const duration = Math.ceil((taskEnd - taskStart) / (1000 * 60 * 60 * 24)) + 1;
 
                 const bar = document.createElement('div');
@@ -873,7 +925,16 @@
                 }
 
                 chartRow.appendChild(bar);
-                ganttChartArea.appendChild(chartRow);
+
+                // 統合コンテナ
+                const rowContainer = document.createElement('div');
+                rowContainer.className = `gantt-row-container ${task.type}`;
+                if (task.type === 'parent' && task.collapsed) {
+                    rowContainer.classList.add('collapsed');
+                }
+
+                taskListFixed.appendChild(taskInfo);
+                ganttChartScroll.appendChild(chartRow);
             });
         }
 
@@ -913,6 +974,9 @@
                 tasks = tasks.filter(t => t.id !== taskId);
             }
             
+            // カレンダー範囲を再計算して再描画
+            calculateCalendarRange();
+            renderCalendar();
             renderAll();
         }
 
@@ -956,8 +1020,10 @@
             updateFormFields();
             
             // デフォルト日付を設定
-            const defaultStart = new Date(2025, 9, 1);
-            const defaultEnd = new Date(2025, 9, 7);
+            const today = new Date();
+            const defaultStart = calendarStartDate || new Date(2025, 9, 1);
+            const defaultEnd = new Date(defaultStart);
+            defaultEnd.setDate(defaultEnd.getDate() + 6);
             
             document.getElementById('taskStartDate').value = defaultStart.toISOString().split('T')[0];
             document.getElementById('taskEndDate').value = defaultEnd.toISOString().split('T')[0];
@@ -1057,6 +1123,10 @@
 
             tasks.push(newTask);
             closeModal();
+            
+            // カレンダー範囲を再計算して再描画
+            calculateCalendarRange();
+            renderCalendar();
             renderAll();
             
             alert('タスクを追加しました!');
