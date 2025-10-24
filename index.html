@@ -15,17 +15,15 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #006888;
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 100%;
+            width: 100%;
             margin: 0;
-            margin-left: 0;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
+            min-height: 100vh;
         }
 
         .header {
@@ -149,6 +147,7 @@
         .calendar-header-scroll {
             flex: 1;
             overflow-x: hidden;
+            overflow-y: hidden;
         }
 
         .calendar-headers {
@@ -202,7 +201,8 @@
         /* タスクとガントチャートの統合エリア */
         .gantt-content-wrapper {
             display: flex;
-            max-height: 600px;
+            max-height: calc(100vh - 400px);
+            min-height: 400px;
             position: relative;
         }
 
@@ -213,8 +213,6 @@
             border-right: 3px solid #006888;
             overflow-y: auto;
             overflow-x: hidden;
-            position: relative;
-            z-index: 10;
         }
 
         .gantt-chart-scroll {
@@ -228,7 +226,6 @@
         }
 
         .task-row {
-            min-height: 60px;
             padding: 10px 15px;
             border-bottom: 1px solid #e0e0e0;
             background: white;
@@ -307,9 +304,10 @@
         /* ガントチャート部分 */
         .gantt-chart-row {
             position: relative;
-            min-height: 60px;
             background: white;
             border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
         }
 
         .gantt-chart-row:nth-child(even) {
@@ -342,7 +340,8 @@
         .gantt-bar {
             position: absolute;
             height: 32px;
-            top: 14px;
+            top: 50%;
+            transform: translateY(-50%);
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -357,7 +356,7 @@
         }
 
         .gantt-bar:hover {
-            transform: translateY(-2px);
+            transform: translateY(-50%) translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.25);
         }
 
@@ -906,6 +905,7 @@
 
                 const taskRow = document.createElement('div');
                 taskRow.className = `task-row ${task.type}`;
+                taskRow.dataset.taskId = task.id;
                 if (task.type === 'parent' && task.collapsed) {
                     taskRow.classList.add('collapsed');
                 }
@@ -953,6 +953,9 @@
                 taskRow.appendChild(taskDetails);
                 taskListFixed.appendChild(taskRow);
             });
+
+            // 高さを同期（描画後）
+            syncRowHeights();
         }
 
         // ガントチャート描画（右側・スクロール）
@@ -971,6 +974,7 @@
 
                 const chartRow = document.createElement('div');
                 chartRow.className = `gantt-chart-row ${task.type}`;
+                chartRow.dataset.taskId = task.id;
 
                 const taskStart = new Date(task.startDate);
                 const taskEnd = new Date(task.endDate);
@@ -994,6 +998,22 @@
 
                 chartRow.appendChild(bar);
                 ganttChartContent.appendChild(chartRow);
+            });
+
+            // 高さを同期（描画後）
+            syncRowHeights();
+        }
+
+        // タスク行とガントチャート行の高さを同期
+        function syncRowHeights() {
+            const taskRows = document.querySelectorAll('.task-row');
+            const ganttRows = document.querySelectorAll('.gantt-chart-row');
+
+            taskRows.forEach((taskRow, index) => {
+                if (ganttRows[index]) {
+                    const taskHeight = taskRow.offsetHeight;
+                    ganttRows[index].style.height = taskHeight + 'px';
+                }
             });
         }
 
