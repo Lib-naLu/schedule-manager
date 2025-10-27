@@ -403,19 +403,18 @@
         /* ドラッグ作成用の空行 */
         .gantt-drag-space {
             min-height: 60px;
-            background: #f8f9fa;
-            border-bottom: 2px dashed #dee2e6;
+            background: #e8f5e9;
+            border-bottom: 2px dashed #28a745;
             position: relative;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
-            color: #999;
+            color: #28a745;
             font-size: 0.9em;
         }
 
-        .gantt-drag-space.create-mode-active {
-            background: #e8f5e9;
-            color: #28a745;
+        .gantt-drag-space.visible {
+            display: flex;
         }
 
         .drag-preview {
@@ -1186,11 +1185,9 @@
             const dragSpace = document.createElement('div');
             dragSpace.className = 'gantt-drag-space';
             dragSpace.id = 'ganttDragSpace';
+            dragSpace.textContent = 'ここにドラッグしてタスクを作成';
             if (isCreateMode) {
-                dragSpace.classList.add('create-mode-active');
-                dragSpace.textContent = 'ここにドラッグしてタスクを作成';
-            } else {
-                dragSpace.textContent = '作成モードをONにしてください';
+                dragSpace.classList.add('visible');
             }
             ganttChartContent.appendChild(dragSpace);
 
@@ -1438,16 +1435,14 @@
                 btn.classList.add('active');
                 ganttScroll.classList.add('create-mode');
                 if (dragSpace) {
-                    dragSpace.classList.add('create-mode-active');
-                    dragSpace.textContent = 'ここにドラッグしてタスクを作成';
+                    dragSpace.classList.add('visible');
                 }
             } else {
                 btn.textContent = '作成モード: OFF';
                 btn.classList.remove('active');
                 ganttScroll.classList.remove('create-mode');
                 if (dragSpace) {
-                    dragSpace.classList.remove('create-mode-active');
-                    dragSpace.textContent = '作成モードをONにしてください';
+                    dragSpace.classList.remove('visible');
                 }
             }
         }
