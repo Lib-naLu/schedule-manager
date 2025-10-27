@@ -142,14 +142,12 @@
             border-radius: 4px;
         }
 
-        /* 新しいレイアウト構造 */
         .gantt-layout {
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* カレンダーヘッダー部分 */
         .calendar-header-wrapper {
             display: flex;
             border-bottom: 3px solid #006888;
@@ -193,6 +191,10 @@
             border-right: 1px solid #004d66;
         }
 
+        .month-item.alternate {
+            background: #4d9fb8;
+        }
+
         .month-item:last-child {
             border-right: none;
         }
@@ -204,10 +206,10 @@
         }
 
         .timeline-item {
-            min-width: 40px;
+            min-width: 20px;
             text-align: center;
-            padding: 8px 2px;
-            font-size: 0.8em;
+            padding: 4px 1px;
+            font-size: 0.7em;
             color: #333;
             font-weight: 600;
             border-right: 1px solid #dee2e6;
@@ -220,7 +222,6 @@
             color: #1976d2;
         }
 
-        /* タスクとガントチャートの統合エリア */
         .gantt-content-wrapper {
             display: flex;
             max-height: calc(100vh - 400px);
@@ -241,6 +242,10 @@
             flex: 1;
             overflow: auto;
             background: #fff;
+        }
+
+        .gantt-chart-scroll.create-mode {
+            cursor: crosshair;
         }
 
         .gantt-chart-content {
@@ -323,7 +328,6 @@
             color: #666;
         }
 
-        /* ガントチャート部分 */
         .gantt-chart-row {
             position: relative;
             background: white;
@@ -355,7 +359,7 @@
             top: 100%;
             width: 1px;
             height: 3000px;
-            background: #e0e0e0;
+            background: #dee2e6;
             z-index: 1;
         }
 
@@ -382,7 +386,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.25);
         }
 
-        /* 親タスクの実施日表示 */
         .event-date-badge {
             position: absolute;
             top: -8px;
@@ -397,24 +400,79 @@
             white-space: nowrap;
         }
 
-        /* ドラッグ作成モードのスタイル */
-        .gantt-chart-scroll.create-mode {
-            cursor: crosshair;
+        /* ドラッグ作成用の空行 */
+        .gantt-drag-space {
+            min-height: 60px;
+            background: #f8f9fa;
+            border-bottom: 2px dashed #dee2e6;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .gantt-drag-space.create-mode-active {
+            background: #e8f5e9;
+            color: #28a745;
         }
 
         .drag-preview {
             position: absolute;
-            height: 20px;
+            height: 30px;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(0, 104, 136, 0.5);
-            border: 2px dashed #006888;
+            background: rgba(0, 104, 136, 0.6);
+            border: 2px solid #006888;
             border-radius: 6px;
-            pointer-events: none;
+            cursor: move;
             z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75em;
+            font-weight: bold;
         }
 
-        /* 簡易作成フォームのスタイル */
+        .drag-preview-handle {
+            position: absolute;
+            width: 10px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: ew-resize;
+        }
+
+        .drag-preview-handle.left {
+            left: 0;
+            border-radius: 6px 0 0 6px;
+        }
+
+        .drag-preview-handle.right {
+            right: 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .drag-preview-confirm {
+            position: absolute;
+            top: -35px;
+            right: 0;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+
+        .drag-preview-confirm:hover {
+            background: #218838;
+        }
+
         .quick-create-modal {
             display: none;
             position: fixed;
@@ -691,7 +749,7 @@
         </div>
 
         <div class="controls">
-            <button class="btn-create-mode" id="createModeBtn" onclick="toggleCreateMode()">📝 作成モード: OFF</button>
+            <button class="btn-create-mode" id="createModeBtn" onclick="toggleCreateMode()">作成モード: OFF</button>
             <button class="btn" onclick="addTask()">➕ 新規タスク追加</button>
         </div>
 
@@ -703,7 +761,6 @@
         </div>
 
         <div class="gantt-layout">
-            <!-- カレンダーヘッダー -->
             <div class="calendar-header-wrapper">
                 <div class="task-header">タスク一覧</div>
                 <div class="calendar-header-scroll" id="calendarHeaderScroll">
@@ -714,7 +771,6 @@
                 </div>
             </div>
 
-            <!-- タスクとガントチャートのエリア -->
             <div class="gantt-content-wrapper">
                 <div class="task-list-fixed" id="taskListFixed">
                     <div class="empty-state">
@@ -729,7 +785,6 @@
         </div>
     </div>
 
-    <!-- 簡易作成モーダル -->
     <div id="quickCreateModal" class="quick-create-modal">
         <div class="quick-create-content">
             <h3>🎯 新しいタスクを作成</h3>
@@ -757,7 +812,6 @@
         </div>
     </div>
 
-    <!-- モーダル -->
     <div id="taskModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
@@ -767,7 +821,6 @@
                     <label>イベント名 <span class="info-icon" title="親タスクまたは子タスクの名前を入力">?</span></label>
                     <input type="text" id="taskName" required>
                 </div>
-
                 <div class="form-group">
                     <label>種別 <span class="info-icon" title="親タスク:イベント全体、子タスク:個別のタスク">?</span></label>
                     <select id="taskType" required onchange="updateFormFields()">
@@ -775,32 +828,26 @@
                         <option value="child">子タスク(個別タスク)</option>
                     </select>
                 </div>
-
                 <div class="form-group" id="parentSelectGroup" style="display:none;">
                     <label>親タスク選択</label>
                     <select id="parentTask"></select>
                 </div>
-
                 <div class="form-group">
                     <label>担当者</label>
                     <input type="text" id="taskAssignee" placeholder="例:奈良先生">
                 </div>
-
                 <div class="form-group">
                     <label>開始日</label>
                     <input type="date" id="taskStartDate" required>
                 </div>
-
                 <div class="form-group">
                     <label>終了日</label>
                     <input type="date" id="taskEndDate" required>
                 </div>
-
                 <div class="form-group" id="eventDateGroup" style="display:none;">
                     <label>実施日 <span class="info-icon" title="イベントの実施日を入力（親タスクのみ）">?</span></label>
                     <input type="date" id="eventDate">
                 </div>
-
                 <div class="form-group">
                     <label>ガントチャートの色</label>
                     <div class="color-picker-group">
@@ -808,19 +855,16 @@
                         <input type="color" id="taskColor" value="#667eea">
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label>関連リンク(任意)</label>
                     <input type="url" id="taskLink" placeholder="https://...">
                 </div>
-
                 <button type="submit" class="btn">保存</button>
             </form>
         </div>
     </div>
 
     <script>
-        // カラープリセット（明暗10色）
         const colorPresets = [
             { name: '赤-明', color: '#ef5350' },
             { name: '赤-暗', color: '#c62828' },
@@ -834,28 +878,28 @@
             { name: '紫-暗', color: '#6a1b9a' }
         ];
 
-        // データ構造
         let tasks = [];
         let toolTitle = 'Event Timeline Manager';
         let calendarStartDate = null;
         let calendarEndDate = null;
         let totalDays = 0;
         
-        // ドラッグ作成モードの状態
         let isCreateMode = false;
         let isDragging = false;
+        let isResizing = false;
+        let isMoving = false;
+        let resizeHandle = null;
         let dragStartDate = null;
         let dragEndDate = null;
         let dragPreviewElement = null;
         let currentDragRow = null;
+        let confirmButton = null;
 
-        // LocalStorage キー
         const STORAGE_KEYS = {
             TASKS: 'gantt_tasks',
             TOOL_TITLE: 'gantt_tool_title'
         };
 
-        // 初期化
         function init() {
             loadFromStorage();
             loadToolTitle();
@@ -868,31 +912,25 @@
             setupDragCreateListeners();
         }
 
-        // LocalStorageからデータ読み込み
         function loadFromStorage() {
             try {
                 const savedTasks = localStorage.getItem(STORAGE_KEYS.TASKS);
                 if (savedTasks) {
                     tasks = JSON.parse(savedTasks);
-                    console.log('タスクを読み込みました:', tasks.length + '件');
                 }
             } catch (error) {
                 console.error('タスクの読み込みに失敗しました:', error);
             }
         }
 
-        // LocalStorageにデータ保存
         function saveToStorage() {
             try {
                 localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
-                console.log('タスクを保存しました:', tasks.length + '件');
             } catch (error) {
                 console.error('タスクの保存に失敗しました:', error);
-                alert('データの保存に失敗しました。ブラウザの容量が不足している可能性があります。');
             }
         }
 
-        // ツール名称の読み込み
         function loadToolTitle() {
             const savedTitle = localStorage.getItem(STORAGE_KEYS.TOOL_TITLE);
             if (savedTitle) {
@@ -901,7 +939,6 @@
             }
         }
 
-        // ツール名称の編集
         function editToolTitle() {
             const newTitle = prompt('ツール名称を入力してください:', toolTitle);
             if (newTitle && newTitle.trim() !== '') {
@@ -911,34 +948,27 @@
             }
         }
 
-        // カラープリセット描画
         function renderColorPresets() {
             const container = document.getElementById('colorPresets');
             container.innerHTML = '';
-            
             colorPresets.forEach(preset => {
                 const colorDiv = document.createElement('div');
                 colorDiv.className = 'color-preset';
                 colorDiv.style.backgroundColor = preset.color;
                 colorDiv.title = preset.name;
                 colorDiv.onclick = () => selectColorPreset(preset.color, colorDiv);
-                
                 container.appendChild(colorDiv);
             });
         }
 
-        // カラープリセット選択
         function selectColorPreset(color, element) {
             document.getElementById('taskColor').value = color;
-            
-            // 選択状態の更新
             document.querySelectorAll('.color-preset').forEach(el => {
                 el.classList.remove('selected');
             });
             element.classList.add('selected');
         }
 
-        // フォームフィールド更新
         function updateFormFields() {
             const taskType = document.getElementById('taskType').value;
             const parentSelectGroup = document.getElementById('parentSelectGroup');
@@ -953,14 +983,11 @@
             }
         }
 
-        // カレンダー範囲の計算
         function calculateCalendarRange() {
             if (tasks.length === 0) {
-                // タスクがない場合はデフォルト期間
                 calendarStartDate = new Date('2025-10-01');
                 calendarEndDate = new Date('2025-12-31');
             } else {
-                // 全タスクの最小開始日と最大終了日を取得
                 let minDate = new Date(tasks[0].startDate);
                 let maxDate = new Date(tasks[0].endDate);
                 
@@ -971,26 +998,22 @@
                     if (end > maxDate) maxDate = end;
                 });
                 
-                // 月の初日と末日に調整
                 calendarStartDate = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
                 calendarEndDate = new Date(maxDate.getFullYear(), maxDate.getMonth() + 1, 0);
             }
             
             totalDays = Math.ceil((calendarEndDate - calendarStartDate) / (1000 * 60 * 60 * 24)) + 1;
             
-            // ヘッダーの期間表示を更新
             const startStr = `${calendarStartDate.getFullYear()}年${calendarStartDate.getMonth() + 1}月`;
             const endStr = `${calendarEndDate.getFullYear()}年${calendarEndDate.getMonth() + 1}月`;
             document.getElementById('dateRange').textContent = `${startStr} 〜 ${endStr}`;
         }
 
-        // カレンダー描画
         function renderCalendar() {
             renderMonthHeader();
             renderTimeline();
         }
 
-        // 月ヘッダー描画
         function renderMonthHeader() {
             const monthHeader = document.getElementById('monthHeader');
             monthHeader.innerHTML = '';
@@ -1003,7 +1026,6 @@
                 const month = currentMonth.getMonth();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
                 
-                // カレンダー範囲内の日数を計算
                 let visibleDays = daysInMonth;
                 if (currentMonth.getTime() === new Date(calendarStartDate.getFullYear(), calendarStartDate.getMonth(), 1).getTime()) {
                     visibleDays = daysInMonth - calendarStartDate.getDate() + 1;
@@ -1022,17 +1044,19 @@
                 currentMonth.setMonth(currentMonth.getMonth() + 1);
             }
             
-            months.forEach(month => {
+            months.forEach((month, index) => {
                 const item = document.createElement('div');
                 item.className = 'month-item';
+                if (index % 2 === 1) {
+                    item.classList.add('alternate');
+                }
                 item.textContent = month.name;
-                item.style.minWidth = (month.days * 40) + 'px';
-                item.style.flex = `0 0 ${month.days * 40}px`;
+                item.style.minWidth = (month.days * 20) + 'px';
+                item.style.flex = `0 0 ${month.days * 20}px`;
                 monthHeader.appendChild(item);
             });
         }
 
-        // タイムライン描画(日別)
         function renderTimeline() {
             const timeline = document.getElementById('timeline');
             timeline.innerHTML = '';
@@ -1056,18 +1080,15 @@
             }
         }
 
-        // スクロール同期（横スクロールのみ）
         function syncScroll() {
             const ganttChartScroll = document.getElementById('ganttChartScroll');
             const headerScroll = document.getElementById('calendarHeaderScroll');
             
-            // 横スクロール同期
             ganttChartScroll.addEventListener('scroll', function() {
                 headerScroll.scrollLeft = this.scrollLeft;
             });
         }
 
-        // 全体描画
         function renderAll() {
             if (tasks.length === 0) {
                 renderEmpty();
@@ -1078,7 +1099,6 @@
             renderLegend();
         }
 
-        // 空状態の描画
         function renderEmpty() {
             const taskListFixed = document.getElementById('taskListFixed');
             taskListFixed.innerHTML = `
@@ -1092,7 +1112,6 @@
             ganttChartContent.innerHTML = '';
         }
 
-        // タスクリスト描画（左側・固定）
         function renderTaskList() {
             const taskListFixed = document.getElementById('taskListFixed');
             taskListFixed.innerHTML = '';
@@ -1156,15 +1175,24 @@
                 taskListFixed.appendChild(taskRow);
             });
 
-            // 高さを同期（描画後）
             syncRowHeights();
         }
 
-        // ガントチャート描画（右側・スクロール）
         function renderGanttChart() {
             const ganttChartContent = document.getElementById('ganttChartContent');
             ganttChartContent.innerHTML = '';
-            ganttChartContent.style.minWidth = (totalDays * 40) + 'px';
+            ganttChartContent.style.minWidth = (totalDays * 20) + 'px';
+
+            const dragSpace = document.createElement('div');
+            dragSpace.className = 'gantt-drag-space';
+            dragSpace.id = 'ganttDragSpace';
+            if (isCreateMode) {
+                dragSpace.classList.add('create-mode-active');
+                dragSpace.textContent = 'ここにドラッグしてタスクを作成';
+            } else {
+                dragSpace.textContent = '作成モードをONにしてください';
+            }
+            ganttChartContent.appendChild(dragSpace);
 
             tasks.forEach(task => {
                 if (task.type === 'child') {
@@ -1185,12 +1213,11 @@
 
                 const bar = document.createElement('div');
                 bar.className = 'gantt-bar';
-                bar.style.left = `${startOffset * 40}px`;
-                bar.style.width = `${duration * 40}px`;
+                bar.style.left = `${startOffset * 20}px`;
+                bar.style.width = `${duration * 20}px`;
                 bar.style.backgroundColor = task.color;
                 bar.onclick = () => editTask(task.id);
 
-                // 親タスクで実施日がある場合、バッジ表示
                 if (task.type === 'parent' && task.eventDate) {
                     const badge = document.createElement('div');
                     badge.className = 'event-date-badge';
@@ -1202,11 +1229,9 @@
                 ganttChartContent.appendChild(chartRow);
             });
 
-            // 高さを同期（描画後）
             syncRowHeights();
         }
 
-        // タスク行とガントチャート行の高さを同期
         function syncRowHeights() {
             const taskRows = document.querySelectorAll('.task-row');
             const ganttRows = document.querySelectorAll('.gantt-chart-row');
@@ -1219,17 +1244,15 @@
             });
         }
 
-        // 折りたたみ切り替え
         function toggleCollapse(parentId) {
             const parent = tasks.find(t => t.id === parentId);
             if (!parent || parent.type !== 'parent') return;
             
             parent.collapsed = !parent.collapsed;
-            saveToStorage(); // 状態を保存
+            saveToStorage();
             renderAll();
         }
 
-        // タスク削除
         function deleteTask(taskId) {
             const task = tasks.find(t => t.id === taskId);
             if (!task) return;
@@ -1256,15 +1279,12 @@
                 tasks = tasks.filter(t => t.id !== taskId);
             }
             
-            saveToStorage(); // 削除を保存
-            
-            // カレンダー範囲を再計算して再描画
+            saveToStorage();
             calculateCalendarRange();
             renderCalendar();
             renderAll();
         }
 
-        // 凡例描画
         function renderLegend() {
             const legendItems = document.getElementById('legendItems');
             legendItems.innerHTML = '';
@@ -1296,22 +1316,18 @@
             });
         }
 
-        // モーダル制御
         function addTask() {
             document.getElementById('taskForm').reset();
             document.getElementById('taskModal').style.display = 'block';
             updateParentSelect();
             updateFormFields();
             
-            // デフォルト日付を設定
             const defaultStart = calendarStartDate || new Date(2025, 9, 1);
             const defaultEnd = new Date(defaultStart);
             defaultEnd.setDate(defaultEnd.getDate() + 6);
             
             document.getElementById('taskStartDate').value = defaultStart.toISOString().split('T')[0];
             document.getElementById('taskEndDate').value = defaultEnd.toISOString().split('T')[0];
-            
-            // デフォルトカラー設定
             document.getElementById('taskColor').value = '#667eea';
         }
 
@@ -1328,7 +1344,6 @@
             document.getElementById('taskLink').value = task.link || '';
             document.getElementById('eventDate').value = task.eventDate || '';
 
-            // カラープリセットの選択状態を更新
             const presetIndex = colorPresets.findIndex(p => p.color === task.color);
             if (presetIndex !== -1) {
                 const presetElements = document.querySelectorAll('.color-preset');
@@ -1344,7 +1359,6 @@
             document.getElementById('taskModal').style.display = 'none';
         }
 
-        // 親タスク選択肢更新
         function updateParentSelect() {
             const select = document.getElementById('parentTask');
             select.innerHTML = '';
@@ -1366,13 +1380,11 @@
             });
         }
 
-        // フォーム送信
         document.getElementById('taskForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const taskType = document.getElementById('taskType').value;
             
-            // 子タスクの場合、親タスクが存在するかチェック
             if (taskType === 'child') {
                 const parentTasks = tasks.filter(t => t.type === 'parent');
                 if (parentTasks.length === 0) {
@@ -1405,10 +1417,9 @@
             }
 
             tasks.push(newTask);
-            saveToStorage(); // タスク追加を保存
+            saveToStorage();
             closeModal();
             
-            // カレンダー範囲を再計算して再描画
             calculateCalendarRange();
             renderCalendar();
             renderAll();
@@ -1416,24 +1427,31 @@
             alert('タスクを追加しました!');
         });
 
-        // 作成モード切り替え
         function toggleCreateMode() {
             isCreateMode = !isCreateMode;
             const btn = document.getElementById('createModeBtn');
             const ganttScroll = document.getElementById('ganttChartScroll');
+            const dragSpace = document.getElementById('ganttDragSpace');
             
             if (isCreateMode) {
-                btn.textContent = '📝 作成モード: ON';
+                btn.textContent = '作成モード: ON';
                 btn.classList.add('active');
                 ganttScroll.classList.add('create-mode');
+                if (dragSpace) {
+                    dragSpace.classList.add('create-mode-active');
+                    dragSpace.textContent = 'ここにドラッグしてタスクを作成';
+                }
             } else {
-                btn.textContent = '📝 作成モード: OFF';
+                btn.textContent = '作成モード: OFF';
                 btn.classList.remove('active');
                 ganttScroll.classList.remove('create-mode');
+                if (dragSpace) {
+                    dragSpace.classList.remove('create-mode-active');
+                    dragSpace.textContent = '作成モードをONにしてください';
+                }
             }
         }
 
-        // ドラッグ作成のイベントリスナーを設定
         function setupDragCreateListeners() {
             const ganttScroll = document.getElementById('ganttChartScroll');
             
@@ -1443,17 +1461,32 @@
             ganttScroll.addEventListener('mouseleave', handleDragCancel);
         }
 
-        // ドラッグ開始
         function handleDragStart(e) {
             if (!isCreateMode) return;
-            if (e.target.closest('.gantt-bar')) return; // 既存のバーはスキップ
+            
+            if (e.target.classList.contains('drag-preview-handle')) {
+                isResizing = true;
+                resizeHandle = e.target.classList.contains('left') ? 'left' : 'right';
+                return;
+            }
+            
+            if (e.target.closest('.drag-preview-confirm')) return;
+            if (e.target.closest('.gantt-bar')) return;
+            
+            if (dragPreviewElement) {
+                if (e.target === dragPreviewElement) {
+                    isMoving = true;
+                    return;
+                }
+                return;
+            }
             
             const ganttContent = document.getElementById('ganttChartContent');
             const rect = ganttContent.getBoundingClientRect();
             const scrollLeft = document.getElementById('ganttChartScroll').scrollLeft;
             
             const x = e.clientX - rect.left + scrollLeft;
-            const dayIndex = Math.floor(x / 40);
+            const dayIndex = Math.floor(x / 20);
             
             if (dayIndex < 0 || dayIndex >= totalDays) return;
             
@@ -1462,88 +1495,89 @@
             dragStartDate.setDate(dragStartDate.getDate() + dayIndex);
             dragEndDate = new Date(dragStartDate);
             
-            // Y座標から行を判定
-            const y = e.clientY - rect.top + document.getElementById('ganttChartScroll').scrollTop;
-            const rows = document.querySelectorAll('.gantt-chart-row');
-            let rowTop = 0;
-            currentDragRow = null;
+            const dragSpace = document.getElementById('ganttDragSpace');
+            if (!dragSpace) return;
             
-            for (let row of rows) {
-                const rowHeight = row.offsetHeight;
-                if (y >= rowTop && y < rowTop + rowHeight) {
-                    currentDragRow = row;
-                    break;
-                }
-                rowTop += rowHeight;
-            }
+            currentDragRow = dragSpace;
             
-            // プレビュー要素を作成
-            if (currentDragRow) {
-                dragPreviewElement = document.createElement('div');
-                dragPreviewElement.className = 'drag-preview';
-                currentDragRow.appendChild(dragPreviewElement);
-                updateDragPreview();
-            }
+            dragPreviewElement = document.createElement('div');
+            dragPreviewElement.className = 'drag-preview';
+            
+            const leftHandle = document.createElement('div');
+            leftHandle.className = 'drag-preview-handle left';
+            dragPreviewElement.appendChild(leftHandle);
+            
+            const rightHandle = document.createElement('div');
+            rightHandle.className = 'drag-preview-handle right';
+            dragPreviewElement.appendChild(rightHandle);
+            
+            currentDragRow.appendChild(dragPreviewElement);
+            updateDragPreview();
         }
 
-        // ドラッグ中
         function handleDragMove(e) {
-            if (!isDragging || !currentDragRow) return;
+            if (!dragPreviewElement) return;
             
             const ganttContent = document.getElementById('ganttChartContent');
             const rect = ganttContent.getBoundingClientRect();
             const scrollLeft = document.getElementById('ganttChartScroll').scrollLeft;
             
             const x = e.clientX - rect.left + scrollLeft;
-            const dayIndex = Math.floor(x / 40);
+            const dayIndex = Math.floor(x / 20);
             
             if (dayIndex < 0 || dayIndex >= totalDays) return;
             
             const currentDate = new Date(calendarStartDate);
             currentDate.setDate(currentDate.getDate() + dayIndex);
             
-            // ドラッグ方向に応じて終了日を更新
-            dragEndDate = currentDate;
+            if (isResizing) {
+                if (resizeHandle === 'left') {
+                    dragStartDate = currentDate;
+                } else {
+                    dragEndDate = currentDate;
+                }
+            } else if (isMoving) {
+                const duration = Math.ceil((dragEndDate - dragStartDate) / (1000 * 60 * 60 * 24));
+                dragStartDate = currentDate;
+                dragEndDate = new Date(currentDate);
+                dragEndDate.setDate(dragEndDate.getDate() + duration);
+            } else if (isDragging) {
+                dragEndDate = currentDate;
+            }
             
             updateDragPreview();
         }
 
-        // ドラッグ終了
         function handleDragEnd(e) {
+            if (isResizing) {
+                isResizing = false;
+                resizeHandle = null;
+                updateDragPreview();
+                return;
+            }
+            
+            if (isMoving) {
+                isMoving = false;
+                return;
+            }
+            
             if (!isDragging) return;
             
             isDragging = false;
             
-            if (dragPreviewElement) {
-                dragPreviewElement.remove();
-                dragPreviewElement = null;
+            if (dragPreviewElement && !confirmButton) {
+                confirmButton = document.createElement('button');
+                confirmButton.className = 'drag-preview-confirm';
+                confirmButton.textContent = '✓ 作成';
+                confirmButton.onclick = confirmTaskCreation;
+                dragPreviewElement.appendChild(confirmButton);
             }
-            
-            // 開始日と終了日を正規化(入れ替え)
-            let startDate = new Date(Math.min(dragStartDate, dragEndDate));
-            let endDate = new Date(Math.max(dragStartDate, dragEndDate));
-            
-            // 簡易作成モーダルを表示
-            showQuickCreateModal(startDate, endDate);
-            
-            currentDragRow = null;
         }
 
-        // ドラッグキャンセル
         function handleDragCancel() {
-            if (!isDragging) return;
-            
-            isDragging = false;
-            
-            if (dragPreviewElement) {
-                dragPreviewElement.remove();
-                dragPreviewElement = null;
-            }
-            
-            currentDragRow = null;
+            // プレビューは保持
         }
 
-        // プレビュー更新
         function updateDragPreview() {
             if (!dragPreviewElement) return;
             
@@ -1553,16 +1587,40 @@
             const startOffset = Math.ceil((startDate - calendarStartDate) / (1000 * 60 * 60 * 24));
             const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
             
-            dragPreviewElement.style.left = `${startOffset * 40}px`;
-            dragPreviewElement.style.width = `${duration * 40}px`;
+            dragPreviewElement.style.left = `${startOffset * 20}px`;
+            dragPreviewElement.style.width = `${duration * 20}px`;
+            
+            const startStr = `${startDate.getMonth() + 1}/${startDate.getDate()}`;
+            const endStr = `${endDate.getMonth() + 1}/${endDate.getDate()}`;
+            
+            const textNodes = Array.from(dragPreviewElement.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
+            if (textNodes.length > 0) {
+                textNodes[0].textContent = `${startStr} ~ ${endStr}`;
+            } else {
+                dragPreviewElement.insertBefore(document.createTextNode(`${startStr} ~ ${endStr}`), dragPreviewElement.firstChild);
+            }
         }
 
-        // 簡易作成モーダルを表示
+        function confirmTaskCreation() {
+            if (!dragPreviewElement) return;
+            
+            const startDate = new Date(Math.min(dragStartDate, dragEndDate));
+            const endDate = new Date(Math.max(dragStartDate, dragEndDate));
+            
+            if (dragPreviewElement) {
+                dragPreviewElement.remove();
+                dragPreviewElement = null;
+            }
+            confirmButton = null;
+            currentDragRow = null;
+            
+            showQuickCreateModal(startDate, endDate);
+        }
+
         function showQuickCreateModal(startDate, endDate) {
             const modal = document.getElementById('quickCreateModal');
             const dateRange = document.getElementById('quickDateRange');
             
-            // 日付を文字列に変換
             const startStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
             const endStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
             
@@ -1570,10 +1628,8 @@
             dateRange.dataset.startDate = startStr;
             dateRange.dataset.endDate = endStr;
             
-            // フォームをリセット
             document.getElementById('quickCreateForm').reset();
             
-            // デフォルト色を選択
             const firstPreset = document.querySelector('.quick-color-preset');
             if (firstPreset) {
                 firstPreset.click();
@@ -1583,12 +1639,10 @@
             document.getElementById('quickTaskName').focus();
         }
 
-        // 簡易作成モーダルを閉じる
         function closeQuickCreate() {
             document.getElementById('quickCreateModal').style.display = 'none';
         }
 
-        // 簡易作成用のカラープリセット描画
         function renderQuickColorPresets() {
             const container = document.getElementById('quickColorPresets');
             container.innerHTML = '';
@@ -1609,7 +1663,6 @@
             });
         }
 
-        // 簡易作成用カラープリセット選択
         function selectQuickColorPreset(color, element) {
             document.querySelectorAll('.quick-color-preset').forEach(el => {
                 el.classList.remove('selected');
@@ -1617,7 +1670,6 @@
             element.classList.add('selected');
         }
 
-        // 簡易作成フォーム送信
         document.getElementById('quickCreateForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -1640,16 +1692,13 @@
             saveToStorage();
             closeQuickCreate();
             
-            // カレンダー範囲を再計算して再描画
             calculateCalendarRange();
             renderCalendar();
             renderAll();
             
-            // 成功メッセージ
             alert('✅ タスクを作成しました!');
         });
 
-        // 初期化実行
         init();
     </script>
 </body>
