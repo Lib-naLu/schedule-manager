@@ -89,6 +89,28 @@
             background: #c82333;
         }
 
+        .btn-create-mode {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.2s;
+            margin-right: 10px;
+        }
+
+        .btn-create-mode:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-create-mode.active {
+            background: #218838;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+        }
+
         .legend {
             padding: 20px 30px;
             background: #f8f9fa;
@@ -270,7 +292,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 2px;
+            margin-bottom: 5px;
         }
 
         .task-name {
@@ -283,8 +305,8 @@
 
         .task-row.parent .task-name::before {
             content: '▼ ';
-            font-size: 0.75em;
-            margin-right: 3px;
+            font-size: 0.8em;
+            margin-right: 5px;
         }
 
         .task-row.parent.collapsed .task-name::before {
@@ -292,14 +314,13 @@
         }
 
         .task-row.child .task-name {
-            padding-left: 15px;
+            padding-left: 20px;
             font-weight: 400;
         }
 
         .task-details {
             font-size: 0.75em;
             color: #666;
-            line-height: 1.3;
         }
 
         /* ガントチャート部分 */
@@ -343,7 +364,7 @@
             height: 20px;
             top: 50%;
             transform: translateY(-50%);
-            border-radius: 4px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -364,16 +385,157 @@
         /* 親タスクの実施日表示 */
         .event-date-badge {
             position: absolute;
-            top: -6px;
-            right: 3px;
+            top: -8px;
+            right: 5px;
             background: #ff6b6b;
             color: white;
             padding: 1px 5px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 0.65em;
             font-weight: bold;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             white-space: nowrap;
+        }
+
+        /* ドラッグ作成モードのスタイル */
+        .gantt-chart-scroll.create-mode {
+            cursor: crosshair;
+        }
+
+        .drag-preview {
+            position: absolute;
+            height: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 104, 136, 0.5);
+            border: 2px dashed #006888;
+            border-radius: 6px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* 簡易作成フォームのスタイル */
+        .quick-create-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .quick-create-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s;
+        }
+
+        .quick-create-content h3 {
+            color: #006888;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .quick-form-group {
+            margin-bottom: 15px;
+        }
+
+        .quick-form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .quick-form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .quick-form-group input:focus {
+            outline: none;
+            border-color: #006888;
+        }
+
+        .quick-date-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .quick-color-presets {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .quick-color-preset {
+            width: 100%;
+            height: 40px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .quick-color-preset:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .quick-color-preset.selected {
+            border-color: #006888;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #006888;
+        }
+
+        .quick-form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .quick-form-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-quick-create {
+            background: #006888;
+            color: white;
+        }
+
+        .btn-quick-create:hover {
+            background: #005070;
+        }
+
+        .btn-quick-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-quick-cancel:hover {
+            background: #5a6268;
         }
 
         .modal {
@@ -529,6 +691,7 @@
         </div>
 
         <div class="controls">
+            <button class="btn-create-mode" id="createModeBtn" onclick="toggleCreateMode()">📝 作成モード: OFF</button>
             <button class="btn" onclick="addTask()">➕ 新規タスク追加</button>
         </div>
 
@@ -563,6 +726,34 @@
                     <div class="gantt-chart-content" id="ganttChartContent"></div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- 簡易作成モーダル -->
+    <div id="quickCreateModal" class="quick-create-modal">
+        <div class="quick-create-content">
+            <h3>🎯 新しいタスクを作成</h3>
+            <div class="quick-date-info">
+                📅 期間: <span id="quickDateRange"></span>
+            </div>
+            <form id="quickCreateForm">
+                <div class="quick-form-group">
+                    <label>タスク名 <span style="color: #dc3545;">*</span></label>
+                    <input type="text" id="quickTaskName" placeholder="例: 文化祭準備" required>
+                </div>
+                <div class="quick-form-group">
+                    <label>担当者</label>
+                    <input type="text" id="quickTaskAssignee" placeholder="例: 奈良先生">
+                </div>
+                <div class="quick-form-group">
+                    <label>カラー</label>
+                    <div class="quick-color-presets" id="quickColorPresets"></div>
+                </div>
+                <div class="quick-form-buttons">
+                    <button type="button" class="btn-quick-cancel" onclick="closeQuickCreate()">キャンセル</button>
+                    <button type="submit" class="btn-quick-create">作成</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -649,6 +840,14 @@
         let calendarStartDate = null;
         let calendarEndDate = null;
         let totalDays = 0;
+        
+        // ドラッグ作成モードの状態
+        let isCreateMode = false;
+        let isDragging = false;
+        let dragStartDate = null;
+        let dragEndDate = null;
+        let dragPreviewElement = null;
+        let currentDragRow = null;
 
         // LocalStorage キー
         const STORAGE_KEYS = {
@@ -661,10 +860,12 @@
             loadFromStorage();
             loadToolTitle();
             renderColorPresets();
+            renderQuickColorPresets();
             calculateCalendarRange();
             renderCalendar();
             renderAll();
             syncScroll();
+            setupDragCreateListeners();
         }
 
         // LocalStorageからデータ読み込み
@@ -1213,6 +1414,239 @@
             renderAll();
             
             alert('タスクを追加しました!');
+        });
+
+        // 作成モード切り替え
+        function toggleCreateMode() {
+            isCreateMode = !isCreateMode;
+            const btn = document.getElementById('createModeBtn');
+            const ganttScroll = document.getElementById('ganttChartScroll');
+            
+            if (isCreateMode) {
+                btn.textContent = '📝 作成モード: ON';
+                btn.classList.add('active');
+                ganttScroll.classList.add('create-mode');
+            } else {
+                btn.textContent = '📝 作成モード: OFF';
+                btn.classList.remove('active');
+                ganttScroll.classList.remove('create-mode');
+            }
+        }
+
+        // ドラッグ作成のイベントリスナーを設定
+        function setupDragCreateListeners() {
+            const ganttScroll = document.getElementById('ganttChartScroll');
+            
+            ganttScroll.addEventListener('mousedown', handleDragStart);
+            ganttScroll.addEventListener('mousemove', handleDragMove);
+            ganttScroll.addEventListener('mouseup', handleDragEnd);
+            ganttScroll.addEventListener('mouseleave', handleDragCancel);
+        }
+
+        // ドラッグ開始
+        function handleDragStart(e) {
+            if (!isCreateMode) return;
+            if (e.target.closest('.gantt-bar')) return; // 既存のバーはスキップ
+            
+            const ganttContent = document.getElementById('ganttChartContent');
+            const rect = ganttContent.getBoundingClientRect();
+            const scrollLeft = document.getElementById('ganttChartScroll').scrollLeft;
+            
+            const x = e.clientX - rect.left + scrollLeft;
+            const dayIndex = Math.floor(x / 40);
+            
+            if (dayIndex < 0 || dayIndex >= totalDays) return;
+            
+            isDragging = true;
+            dragStartDate = new Date(calendarStartDate);
+            dragStartDate.setDate(dragStartDate.getDate() + dayIndex);
+            dragEndDate = new Date(dragStartDate);
+            
+            // Y座標から行を判定
+            const y = e.clientY - rect.top + document.getElementById('ganttChartScroll').scrollTop;
+            const rows = document.querySelectorAll('.gantt-chart-row');
+            let rowTop = 0;
+            currentDragRow = null;
+            
+            for (let row of rows) {
+                const rowHeight = row.offsetHeight;
+                if (y >= rowTop && y < rowTop + rowHeight) {
+                    currentDragRow = row;
+                    break;
+                }
+                rowTop += rowHeight;
+            }
+            
+            // プレビュー要素を作成
+            if (currentDragRow) {
+                dragPreviewElement = document.createElement('div');
+                dragPreviewElement.className = 'drag-preview';
+                currentDragRow.appendChild(dragPreviewElement);
+                updateDragPreview();
+            }
+        }
+
+        // ドラッグ中
+        function handleDragMove(e) {
+            if (!isDragging || !currentDragRow) return;
+            
+            const ganttContent = document.getElementById('ganttChartContent');
+            const rect = ganttContent.getBoundingClientRect();
+            const scrollLeft = document.getElementById('ganttChartScroll').scrollLeft;
+            
+            const x = e.clientX - rect.left + scrollLeft;
+            const dayIndex = Math.floor(x / 40);
+            
+            if (dayIndex < 0 || dayIndex >= totalDays) return;
+            
+            const currentDate = new Date(calendarStartDate);
+            currentDate.setDate(currentDate.getDate() + dayIndex);
+            
+            // ドラッグ方向に応じて終了日を更新
+            dragEndDate = currentDate;
+            
+            updateDragPreview();
+        }
+
+        // ドラッグ終了
+        function handleDragEnd(e) {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            
+            if (dragPreviewElement) {
+                dragPreviewElement.remove();
+                dragPreviewElement = null;
+            }
+            
+            // 開始日と終了日を正規化(入れ替え)
+            let startDate = new Date(Math.min(dragStartDate, dragEndDate));
+            let endDate = new Date(Math.max(dragStartDate, dragEndDate));
+            
+            // 簡易作成モーダルを表示
+            showQuickCreateModal(startDate, endDate);
+            
+            currentDragRow = null;
+        }
+
+        // ドラッグキャンセル
+        function handleDragCancel() {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            
+            if (dragPreviewElement) {
+                dragPreviewElement.remove();
+                dragPreviewElement = null;
+            }
+            
+            currentDragRow = null;
+        }
+
+        // プレビュー更新
+        function updateDragPreview() {
+            if (!dragPreviewElement) return;
+            
+            const startDate = new Date(Math.min(dragStartDate, dragEndDate));
+            const endDate = new Date(Math.max(dragStartDate, dragEndDate));
+            
+            const startOffset = Math.ceil((startDate - calendarStartDate) / (1000 * 60 * 60 * 24));
+            const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            
+            dragPreviewElement.style.left = `${startOffset * 40}px`;
+            dragPreviewElement.style.width = `${duration * 40}px`;
+        }
+
+        // 簡易作成モーダルを表示
+        function showQuickCreateModal(startDate, endDate) {
+            const modal = document.getElementById('quickCreateModal');
+            const dateRange = document.getElementById('quickDateRange');
+            
+            // 日付を文字列に変換
+            const startStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+            const endStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+            
+            dateRange.textContent = `${startStr} 〜 ${endStr}`;
+            dateRange.dataset.startDate = startStr;
+            dateRange.dataset.endDate = endStr;
+            
+            // フォームをリセット
+            document.getElementById('quickCreateForm').reset();
+            
+            // デフォルト色を選択
+            const firstPreset = document.querySelector('.quick-color-preset');
+            if (firstPreset) {
+                firstPreset.click();
+            }
+            
+            modal.style.display = 'block';
+            document.getElementById('quickTaskName').focus();
+        }
+
+        // 簡易作成モーダルを閉じる
+        function closeQuickCreate() {
+            document.getElementById('quickCreateModal').style.display = 'none';
+        }
+
+        // 簡易作成用のカラープリセット描画
+        function renderQuickColorPresets() {
+            const container = document.getElementById('quickColorPresets');
+            container.innerHTML = '';
+            
+            colorPresets.forEach((preset, index) => {
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'quick-color-preset';
+                colorDiv.style.backgroundColor = preset.color;
+                colorDiv.title = preset.name;
+                colorDiv.dataset.color = preset.color;
+                colorDiv.onclick = () => selectQuickColorPreset(preset.color, colorDiv);
+                
+                if (index === 0) {
+                    colorDiv.classList.add('selected');
+                }
+                
+                container.appendChild(colorDiv);
+            });
+        }
+
+        // 簡易作成用カラープリセット選択
+        function selectQuickColorPreset(color, element) {
+            document.querySelectorAll('.quick-color-preset').forEach(el => {
+                el.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        // 簡易作成フォーム送信
+        document.getElementById('quickCreateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const dateRange = document.getElementById('quickDateRange');
+            const selectedColor = document.querySelector('.quick-color-preset.selected');
+            
+            const newTask = {
+                id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+                name: document.getElementById('quickTaskName').value,
+                type: 'parent',
+                assignee: document.getElementById('quickTaskAssignee').value || '',
+                startDate: dateRange.dataset.startDate,
+                endDate: dateRange.dataset.endDate,
+                color: selectedColor ? selectedColor.dataset.color : colorPresets[0].color,
+                link: '',
+                collapsed: false
+            };
+            
+            tasks.push(newTask);
+            saveToStorage();
+            closeQuickCreate();
+            
+            // カレンダー範囲を再計算して再描画
+            calculateCalendarRange();
+            renderCalendar();
+            renderAll();
+            
+            // 成功メッセージ
+            alert('✅ タスクを作成しました!');
         });
 
         // 初期化実行
