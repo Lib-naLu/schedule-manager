@@ -83,10 +83,26 @@
             cursor: pointer;
             font-size: 0.75em;
             transition: background 0.2s;
+            margin-left: 5px;
         }
 
         .btn-delete:hover {
             background: #c82333;
+        }
+
+        .btn-edit {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: background 0.2s;
+        }
+
+        .btn-edit:hover {
+            background: #0056b3;
         }
 
         .btn-create-mode {
@@ -356,11 +372,35 @@
             content: '';
             position: absolute;
             right: 0;
-            top: 100%;
+            top: 0;
             width: 1px;
-            height: 3000px;
+            height: 100%;
             background: #dee2e6;
             z-index: 1;
+            pointer-events: none;
+        }
+
+        /* ガントチャートエリアの縦線 */
+        .gantt-vertical-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .gantt-vertical-line {
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: #dee2e6;
+        }
+
+        .gantt-vertical-line.weekend {
+            background: #c5e1fb;
         }
 
         .gantt-bar {
@@ -1220,6 +1260,18 @@
                     taskName.appendChild(link);
                 }
 
+                const buttonGroup = document.createElement('div');
+                buttonGroup.style.display = 'flex';
+                buttonGroup.style.gap = '5px';
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn-edit';
+                editBtn.textContent = '編集';
+                editBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    editTask(task.id);
+                };
+
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'btn-delete';
                 deleteBtn.textContent = '削除';
@@ -1228,8 +1280,11 @@
                     deleteTask(task.id);
                 };
 
+                buttonGroup.appendChild(editBtn);
+                buttonGroup.appendChild(deleteBtn);
+
                 taskInfoHeader.appendChild(taskName);
-                taskInfoHeader.appendChild(deleteBtn);
+                taskInfoHeader.appendChild(buttonGroup);
 
                 const taskDetails = document.createElement('div');
                 taskDetails.className = 'task-details';
@@ -1251,6 +1306,28 @@
             const ganttChartContent = document.getElementById('ganttChartContent');
             ganttChartContent.innerHTML = '';
             ganttChartContent.style.minWidth = (totalDays * 20) + 'px';
+            ganttChartContent.style.position = 'relative';
+
+            // 縦線を描画
+            const verticalLines = document.createElement('div');
+            verticalLines.className = 'gantt-vertical-lines';
+            const currentDate = new Date(calendarStartDate);
+            let dayIndex = 0;
+            
+            while (currentDate <= calendarEndDate) {
+                const line = document.createElement('div');
+                line.className = 'gantt-vertical-line';
+                const dayOfWeek = currentDate.getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    line.classList.add('weekend');
+                }
+                line.style.left = `${(dayIndex + 1) * 20}px`;
+                verticalLines.appendChild(line);
+                
+                currentDate.setDate(currentDate.getDate() + 1);
+                dayIndex++;
+            }
+            ganttChartContent.appendChild(verticalLines);
 
             const dragSpace = document.createElement('div');
             dragSpace.className = 'gantt-drag-space';
@@ -1612,7 +1689,7 @@
                     editingBarElement = bar;
                     originalBarLeft = parseInt(bar.style.left);
                     originalBarWidth = parseInt(bar.style.width);
-                    dragStartX = e.clientX;
+                    dragStartX = e.clientX + document.getElementById('ganttChartScroll').scrollLeft;
                     editBarMode = e.target.dataset.handle === 'left' ? 'resize-left' : 'resize-right';
                     e.stopPropagation();
                     return;
@@ -1625,7 +1702,7 @@
                 editingBarElement = bar;
                 originalBarLeft = parseInt(bar.style.left);
                 originalBarWidth = parseInt(bar.style.width);
-                dragStartX = e.clientX;
+                dragStartX = e.clientX + document.getElementById('ganttChartScroll').scrollLeft;
                 editBarMode = 'move';
                 e.stopPropagation();
                 return;
@@ -1675,7 +1752,9 @@
 
         function handleDragMove(e) {
             if (editingBarElement && editBarMode) {
-                const deltaX = e.clientX - dragStartX;
+                const scrollLeft = document.getElementById('ganttChartScroll').scrollLeft;
+                const currentX = e.clientX + scrollLeft;
+                const deltaX = currentX - dragStartX;
                 const deltaPixels = deltaX;
                 
                 if (editBarMode === 'move') {
