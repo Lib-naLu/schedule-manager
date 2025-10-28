@@ -490,7 +490,7 @@
         }
 
         .gantt-drag-space.create-mode-active {
-            display: flex;
+            display: block;
         }
 
         .task-list-space {
@@ -506,7 +506,7 @@
         }
 
         .task-list-space.create-mode-active {
-            display: flex;
+            display: block;
         }
 
         .drag-preview {
@@ -1219,7 +1219,6 @@
             const taskListSpace = document.createElement('div');
             taskListSpace.className = 'task-list-space';
             taskListSpace.id = 'taskListSpace';
-            taskListSpace.textContent = 'タスク作成エリア';
             if (isCreateMode) {
                 taskListSpace.classList.add('create-mode-active');
             }
@@ -1332,7 +1331,6 @@
             const dragSpace = document.createElement('div');
             dragSpace.className = 'gantt-drag-space';
             dragSpace.id = 'ganttDragSpace';
-            dragSpace.textContent = 'ここにドラッグしてタスクを作成';
             if (isCreateMode) {
                 dragSpace.classList.add('create-mode-active');
             }
@@ -1711,6 +1709,7 @@
             if (dragPreviewElement) {
                 if (e.target === dragPreviewElement) {
                     isMoving = true;
+                    dragStartX = e.clientX + document.getElementById('ganttChartScroll').scrollLeft;
                     return;
                 }
                 return;
@@ -1793,10 +1792,25 @@
                     dragEndDate = currentDate;
                 }
             } else if (isMoving) {
-                const duration = Math.ceil((dragEndDate - dragStartDate) / (1000 * 60 * 60 * 24));
-                dragStartDate = currentDate;
-                dragEndDate = new Date(currentDate);
-                dragEndDate.setDate(dragEndDate.getDate() + duration);
+                const scrollLeft2 = document.getElementById('ganttChartScroll').scrollLeft;
+                const currentX = e.clientX + scrollLeft2;
+                const deltaX = currentX - dragStartX;
+                
+                const startOffset = Math.ceil((dragStartDate - calendarStartDate) / (1000 * 60 * 60 * 24));
+                const duration = Math.ceil((dragEndDate - dragStartDate) / (1000 * 60 * 60 * 24)) + 1;
+                
+                const newStartOffset = Math.max(0, Math.min(totalDays - duration, Math.round((startOffset * 20 + deltaX) / 20)));
+                
+                const newStartDate = new Date(calendarStartDate);
+                newStartDate.setDate(newStartDate.getDate() + newStartOffset);
+                
+                const newEndDate = new Date(newStartDate);
+                newEndDate.setDate(newEndDate.getDate() + duration - 1);
+                
+                dragStartDate = newStartDate;
+                dragEndDate = newEndDate;
+                
+                dragStartX = currentX;
             } else if (isDragging) {
                 dragEndDate = currentDate;
             }
