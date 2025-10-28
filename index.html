@@ -386,6 +386,43 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.25);
         }
 
+        .gantt-bar.editable {
+            cursor: move;
+        }
+
+        .gantt-bar.editable:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        .gantt-bar-handle {
+            position: absolute;
+            width: 8px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: ew-resize;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .gantt-bar.editable .gantt-bar-handle {
+            opacity: 1;
+        }
+
+        .gantt-bar-handle.left {
+            left: 0;
+            border-radius: 6px 0 0 6px;
+        }
+
+        .gantt-bar-handle.right {
+            right: 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .gantt-bar-handle:hover {
+            background: rgba(255, 255, 255, 0.6);
+        }
+
         .event-date-badge {
             position: absolute;
             top: -8px;
@@ -400,7 +437,6 @@
             white-space: nowrap;
         }
 
-        /* ドラッグ作成用の空行 */
         .gantt-drag-space {
             min-height: 60px;
             background: #e8f5e9;
@@ -413,7 +449,23 @@
             font-size: 0.9em;
         }
 
-        .gantt-drag-space.visible {
+        .gantt-drag-space.create-mode-active {
+            display: flex;
+        }
+
+        .task-list-space {
+            min-height: 60px;
+            background: #e8f5e9;
+            border-bottom: 2px dashed #28a745;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: #28a745;
+            font-size: 0.9em;
+            padding: 10px;
+        }
+
+        .task-list-space.create-mode-active {
             display: flex;
         }
 
@@ -748,7 +800,7 @@
         </div>
 
         <div class="controls">
-            <button class="btn-create-mode" id="createModeBtn" onclick="toggleCreateMode()">作成モード: OFF</button>
+            <button class="btn-create-mode" id="createModeBtn" onclick="toggleCreateMode()">作成/編集: OFF</button>
             <button class="btn" onclick="addTask()">➕ 新規タスク追加</button>
         </div>
 
@@ -893,6 +945,15 @@
         let dragPreviewElement = null;
         let currentDragRow = null;
         let confirmButton = null;
+        let editingTaskId = null;
+        
+        // 既存タスクのドラッグ編集用
+        let editingBarTaskId = null;
+        let editingBarElement = null;
+        let originalBarLeft = 0;
+        let originalBarWidth = 0;
+        let dragStartX = 0;
+        let editBarMode = null; // 'move' or 'resize-left' or 'resize-right'
 
         const STORAGE_KEYS = {
             TASKS: 'gantt_tasks',
@@ -1115,6 +1176,15 @@
             const taskListFixed = document.getElementById('taskListFixed');
             taskListFixed.innerHTML = '';
 
+            const taskListSpace = document.createElement('div');
+            taskListSpace.className = 'task-list-space';
+            taskListSpace.id = 'taskListSpace';
+            taskListSpace.textContent = 'タスク作成エリア';
+            if (isCreateMode) {
+                taskListSpace.classList.add('create-mode-active');
+            }
+            taskListFixed.appendChild(taskListSpace);
+
             tasks.forEach(task => {
                 if (task.type === 'child') {
                     const parent = tasks.find(t => t.id === task.parentId);
@@ -1187,7 +1257,7 @@
             dragSpace.id = 'ganttDragSpace';
             dragSpace.textContent = 'ここにドラッグしてタスクを作成';
             if (isCreateMode) {
-                dragSpace.classList.add('visible');
+                dragSpace.classList.add('create-mode-active');
             }
             ganttChartContent.appendChild(dragSpace);
 
@@ -1213,7 +1283,23 @@
                 bar.style.left = `${startOffset * 20}px`;
                 bar.style.width = `${duration * 20}px`;
                 bar.style.backgroundColor = task.color;
-                bar.onclick = () => editTask(task.id);
+                bar.dataset.taskId = task.id;
+                
+                if (isCreateMode) {
+                    bar.classList.add('editable');
+                    
+                    const leftHandle = document.createElement('div');
+                    leftHandle.className = 'gantt-bar-handle left';
+                    leftHandle.dataset.handle = 'left';
+                    bar.appendChild(leftHandle);
+                    
+                    const rightHandle = document.createElement('div');
+                    rightHandle.className = 'gantt-bar-handle right';
+                    rightHandle.dataset.handle = 'right';
+                    bar.appendChild(rightHandle);
+                } else {
+                    bar.onclick = () => editTask(task.id);
+                }
 
                 if (task.type === 'parent' && task.eventDate) {
                     const badge = document.createElement('div');
@@ -1314,8 +1400,10 @@
         }
 
         function addTask() {
+            editingTaskId = null;
             document.getElementById('taskForm').reset();
             document.getElementById('taskModal').style.display = 'block';
+            document.querySelector('#taskModal h2').textContent = 'タスク情報（新規作成）';
             updateParentSelect();
             updateFormFields();
             
@@ -1332,6 +1420,7 @@
             const task = tasks.find(t => t.id === taskId);
             if (!task) return;
 
+            editingTaskId = taskId;
             document.getElementById('taskName').value = task.name;
             document.getElementById('taskType').value = task.type;
             document.getElementById('taskAssignee').value = task.assignee;
@@ -1348,7 +1437,13 @@
             }
 
             document.getElementById('taskModal').style.display = 'block';
+            document.querySelector('#taskModal h2').textContent = 'タスク情報（編集）';
             updateParentSelect();
+            
+            if (task.type === 'child') {
+                document.getElementById('parentTask').value = task.parentId;
+            }
+            
             updateFormFields();
         }
 
@@ -1390,30 +1485,64 @@
                 }
             }
             
-            const newTask = {
-                id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
-                name: document.getElementById('taskName').value,
-                type: taskType,
-                assignee: document.getElementById('taskAssignee').value,
-                startDate: document.getElementById('taskStartDate').value,
-                endDate: document.getElementById('taskEndDate').value,
-                color: document.getElementById('taskColor').value,
-                link: document.getElementById('taskLink').value
-            };
+            if (editingTaskId !== null) {
+                const taskIndex = tasks.findIndex(t => t.id === editingTaskId);
+                if (taskIndex !== -1) {
+                    const existingTask = tasks[taskIndex];
+                    
+                    tasks[taskIndex] = {
+                        id: editingTaskId,
+                        name: document.getElementById('taskName').value,
+                        type: taskType,
+                        assignee: document.getElementById('taskAssignee').value,
+                        startDate: document.getElementById('taskStartDate').value,
+                        endDate: document.getElementById('taskEndDate').value,
+                        color: document.getElementById('taskColor').value,
+                        link: document.getElementById('taskLink').value,
+                        collapsed: existingTask.collapsed || false
+                    };
 
-            if (newTask.type === 'child') {
-                newTask.parentId = parseInt(document.getElementById('parentTask').value);
-            }
-            
-            if (newTask.type === 'parent') {
-                newTask.collapsed = false;
-                const eventDate = document.getElementById('eventDate').value;
-                if (eventDate) {
-                    newTask.eventDate = eventDate;
+                    if (tasks[taskIndex].type === 'child') {
+                        tasks[taskIndex].parentId = parseInt(document.getElementById('parentTask').value);
+                    }
+                    
+                    if (tasks[taskIndex].type === 'parent') {
+                        const eventDate = document.getElementById('eventDate').value;
+                        if (eventDate) {
+                            tasks[taskIndex].eventDate = eventDate;
+                        }
+                    }
+                    
+                    alert('タスクを更新しました!');
                 }
+            } else {
+                const newTask = {
+                    id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+                    name: document.getElementById('taskName').value,
+                    type: taskType,
+                    assignee: document.getElementById('taskAssignee').value,
+                    startDate: document.getElementById('taskStartDate').value,
+                    endDate: document.getElementById('taskEndDate').value,
+                    color: document.getElementById('taskColor').value,
+                    link: document.getElementById('taskLink').value
+                };
+
+                if (newTask.type === 'child') {
+                    newTask.parentId = parseInt(document.getElementById('parentTask').value);
+                }
+                
+                if (newTask.type === 'parent') {
+                    newTask.collapsed = false;
+                    const eventDate = document.getElementById('eventDate').value;
+                    if (eventDate) {
+                        newTask.eventDate = eventDate;
+                    }
+                }
+
+                tasks.push(newTask);
+                alert('タスクを追加しました!');
             }
 
-            tasks.push(newTask);
             saveToStorage();
             closeModal();
             
@@ -1421,7 +1550,7 @@
             renderCalendar();
             renderAll();
             
-            alert('タスクを追加しました!');
+            editingTaskId = null;
         });
 
         function toggleCreateMode() {
@@ -1429,22 +1558,31 @@
             const btn = document.getElementById('createModeBtn');
             const ganttScroll = document.getElementById('ganttChartScroll');
             const dragSpace = document.getElementById('ganttDragSpace');
+            const taskListSpace = document.getElementById('taskListSpace');
             
             if (isCreateMode) {
-                btn.textContent = '作成モード: ON';
+                btn.textContent = '作成/編集: ON';
                 btn.classList.add('active');
                 ganttScroll.classList.add('create-mode');
                 if (dragSpace) {
-                    dragSpace.classList.add('visible');
+                    dragSpace.classList.add('create-mode-active');
+                }
+                if (taskListSpace) {
+                    taskListSpace.classList.add('create-mode-active');
                 }
             } else {
-                btn.textContent = '作成モード: OFF';
+                btn.textContent = '作成/編集: OFF';
                 btn.classList.remove('active');
                 ganttScroll.classList.remove('create-mode');
                 if (dragSpace) {
-                    dragSpace.classList.remove('visible');
+                    dragSpace.classList.remove('create-mode-active');
+                }
+                if (taskListSpace) {
+                    taskListSpace.classList.remove('create-mode-active');
                 }
             }
+            
+            renderAll();
         }
 
         function setupDragCreateListeners() {
@@ -1466,7 +1604,32 @@
             }
             
             if (e.target.closest('.drag-preview-confirm')) return;
-            if (e.target.closest('.gantt-bar')) return;
+            
+            if (e.target.classList.contains('gantt-bar-handle')) {
+                const bar = e.target.closest('.gantt-bar');
+                if (bar) {
+                    editingBarTaskId = parseInt(bar.dataset.taskId);
+                    editingBarElement = bar;
+                    originalBarLeft = parseInt(bar.style.left);
+                    originalBarWidth = parseInt(bar.style.width);
+                    dragStartX = e.clientX;
+                    editBarMode = e.target.dataset.handle === 'left' ? 'resize-left' : 'resize-right';
+                    e.stopPropagation();
+                    return;
+                }
+            }
+            
+            const bar = e.target.closest('.gantt-bar');
+            if (bar && bar.classList.contains('editable')) {
+                editingBarTaskId = parseInt(bar.dataset.taskId);
+                editingBarElement = bar;
+                originalBarLeft = parseInt(bar.style.left);
+                originalBarWidth = parseInt(bar.style.width);
+                dragStartX = e.clientX;
+                editBarMode = 'move';
+                e.stopPropagation();
+                return;
+            }
             
             if (dragPreviewElement) {
                 if (e.target === dragPreviewElement) {
@@ -1511,6 +1674,25 @@
         }
 
         function handleDragMove(e) {
+            if (editingBarElement && editBarMode) {
+                const deltaX = e.clientX - dragStartX;
+                const deltaPixels = deltaX;
+                
+                if (editBarMode === 'move') {
+                    const newLeft = Math.max(0, originalBarLeft + deltaPixels);
+                    editingBarElement.style.left = `${newLeft}px`;
+                } else if (editBarMode === 'resize-left') {
+                    const newLeft = Math.max(0, originalBarLeft + deltaPixels);
+                    const newWidth = Math.max(20, originalBarWidth - deltaPixels);
+                    editingBarElement.style.left = `${newLeft}px`;
+                    editingBarElement.style.width = `${newWidth}px`;
+                } else if (editBarMode === 'resize-right') {
+                    const newWidth = Math.max(20, originalBarWidth + deltaPixels);
+                    editingBarElement.style.width = `${newWidth}px`;
+                }
+                return;
+            }
+            
             if (!dragPreviewElement) return;
             
             const ganttContent = document.getElementById('ganttChartContent');
@@ -1544,6 +1726,36 @@
         }
 
         function handleDragEnd(e) {
+            if (editingBarElement && editBarMode) {
+                const task = tasks.find(t => t.id === editingBarTaskId);
+                if (task) {
+                    const newLeft = parseInt(editingBarElement.style.left);
+                    const newWidth = parseInt(editingBarElement.style.width);
+                    
+                    const startDayOffset = Math.round(newLeft / 20);
+                    const duration = Math.round(newWidth / 20);
+                    
+                    const newStartDate = new Date(calendarStartDate);
+                    newStartDate.setDate(newStartDate.getDate() + startDayOffset);
+                    
+                    const newEndDate = new Date(newStartDate);
+                    newEndDate.setDate(newEndDate.getDate() + duration - 1);
+                    
+                    task.startDate = `${newStartDate.getFullYear()}-${String(newStartDate.getMonth() + 1).padStart(2, '0')}-${String(newStartDate.getDate()).padStart(2, '0')}`;
+                    task.endDate = `${newEndDate.getFullYear()}-${String(newEndDate.getMonth() + 1).padStart(2, '0')}-${String(newEndDate.getDate()).padStart(2, '0')}`;
+                    
+                    saveToStorage();
+                    calculateCalendarRange();
+                    renderCalendar();
+                    renderAll();
+                }
+                
+                editingBarTaskId = null;
+                editingBarElement = null;
+                editBarMode = null;
+                return;
+            }
+            
             if (isResizing) {
                 isResizing = false;
                 resizeHandle = null;
@@ -1570,7 +1782,6 @@
         }
 
         function handleDragCancel() {
-            // プレビューは保持
         }
 
         function updateDragPreview() {
