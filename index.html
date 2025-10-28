@@ -105,6 +105,28 @@
             background: #0056b3;
         }
 
+        .btn-move {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7em;
+            transition: background 0.2s;
+            margin-left: 3px;
+        }
+
+        .btn-move:hover {
+            background: #5a6268;
+        }
+
+        .btn-move:disabled {
+            background: #d6d6d6;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
         .btn-create-mode {
             background: #28a745;
             color: white;
@@ -346,10 +368,11 @@
 
         .gantt-chart-row {
             position: relative;
-            background: white;
+            background: transparent;
             border-bottom: 1px solid #e0e0e0;
             display: flex;
             align-items: center;
+            z-index: 2;
         }
 
         .gantt-chart-row:nth-child(even) {
@@ -388,7 +411,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 0;
+            z-index: 1;
         }
 
         .gantt-vertical-line {
@@ -407,6 +430,7 @@
             position: absolute;
             height: 20px;
             top: 50%;
+            z-index: 2;
             transform: translateY(-50%);
             border-radius: 6px;
             display: flex;
@@ -1263,6 +1287,33 @@
                 buttonGroup.style.display = 'flex';
                 buttonGroup.style.gap = '5px';
 
+                // 親タスクの場合は上下移動ボタンを追加
+                if (task.type === 'parent') {
+                    const parentTasks = tasks.filter(t => t.type === 'parent');
+                    const currentIndex = parentTasks.findIndex(t => t.id === task.id);
+
+                    const moveUpBtn = document.createElement('button');
+                    moveUpBtn.className = 'btn-move';
+                    moveUpBtn.textContent = '↑';
+                    moveUpBtn.disabled = currentIndex === 0;
+                    moveUpBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        moveTaskUp(task.id);
+                    };
+
+                    const moveDownBtn = document.createElement('button');
+                    moveDownBtn.className = 'btn-move';
+                    moveDownBtn.textContent = '↓';
+                    moveDownBtn.disabled = currentIndex === parentTasks.length - 1;
+                    moveDownBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        moveTaskDown(task.id);
+                    };
+
+                    buttonGroup.appendChild(moveUpBtn);
+                    buttonGroup.appendChild(moveDownBtn);
+                }
+
                 const editBtn = document.createElement('button');
                 editBtn.className = 'btn-edit';
                 editBtn.textContent = '編集';
@@ -1440,6 +1491,68 @@
             saveToStorage();
             calculateCalendarRange();
             renderCalendar();
+            renderAll();
+        }
+
+        // 親タスクを上に移動（子タスクも一緒に移動）
+        function moveTaskUp(taskId) {
+            // 親タスクとその子タスクをグループ化
+            const groupedTasks = [];
+            const parentTasks = tasks.filter(t => t.type === 'parent');
+            
+            parentTasks.forEach(parent => {
+                const children = tasks.filter(t => t.parentId === parent.id);
+                groupedTasks.push({ parent, children });
+            });
+            
+            // 現在のグループのインデックスを取得
+            const currentIndex = groupedTasks.findIndex(g => g.parent.id === taskId);
+            
+            if (currentIndex <= 0) return; // 上に移動できない
+            
+            // グループを交換
+            [groupedTasks[currentIndex - 1], groupedTasks[currentIndex]] = 
+            [groupedTasks[currentIndex], groupedTasks[currentIndex - 1]];
+            
+            // タスク配列を再構築
+            tasks = [];
+            groupedTasks.forEach(group => {
+                tasks.push(group.parent);
+                tasks.push(...group.children);
+            });
+            
+            saveToStorage();
+            renderAll();
+        }
+
+        // 親タスクを下に移動（子タスクも一緒に移動）
+        function moveTaskDown(taskId) {
+            // 親タスクとその子タスクをグループ化
+            const groupedTasks = [];
+            const parentTasks = tasks.filter(t => t.type === 'parent');
+            
+            parentTasks.forEach(parent => {
+                const children = tasks.filter(t => t.parentId === parent.id);
+                groupedTasks.push({ parent, children });
+            });
+            
+            // 現在のグループのインデックスを取得
+            const currentIndex = groupedTasks.findIndex(g => g.parent.id === taskId);
+            
+            if (currentIndex === -1 || currentIndex >= groupedTasks.length - 1) return; // 下に移動できない
+            
+            // グループを交換
+            [groupedTasks[currentIndex], groupedTasks[currentIndex + 1]] = 
+            [groupedTasks[currentIndex + 1], groupedTasks[currentIndex]];
+            
+            // タスク配列を再構築
+            tasks = [];
+            groupedTasks.forEach(group => {
+                tasks.push(group.parent);
+                tasks.push(...group.children);
+            });
+            
+            saveToStorage();
             renderAll();
         }
 
